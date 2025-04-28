@@ -1,0 +1,80 @@
+﻿using Microsoft.EntityFrameworkCore;
+using PongRank.DataAccess.Utilities;
+using PongRank.DataEntities;
+using PongRank.DataEntities.Core;
+using PongRank.Model;
+
+namespace PongRank.ConsoleApp;
+
+/// <summary>
+/// Aggregate the <see cref="PlayerResultsEntity"/>
+/// </summary>
+public class AggregateService
+{
+    private const int BatchSize = 100;
+    private readonly ITtcDbContext _db;
+
+    public AggregateService(ITtcDbContext db)
+    {
+        _db = db;
+    }
+
+    public async Task CalculateAndSave(Competition competition, int year)
+    {
+        await _db.PlayerResults
+            .Where(x => x.Competition == competition && x.Year == year)
+            .ExecuteDeleteAsync();
+
+        var players = await _db.Players.Where(x => x.Competition == competition && x.Year == year).ToArrayAsync();
+        var nextYearPlayers = await _db.Players.Where(x => x.Competition == competition && x.Year == year + 1).ToArrayAsync();
+        var matches = await _db.Matches.Where(x => x.Competition == competition && x.Year == year).ToArrayAsync();
+
+        int counter = 0;
+
+        var playerLookup = players.ToDictionary(x => x.UniqueIndex, x => x);
+        foreach (var player in players)
+        {
+            var playerResults = new PlayerResultsEntity()
+            {
+                Competition = competition,
+                Year = year,
+                FirstName = player.FirstName,
+                LastName = player.LastName,
+                Ranking = player.Ranking,
+                RankingValue = RankingValueConverter.Get(competition, player.Ranking),
+                UniqueIndex = player.UniqueIndex,
+            };
+
+            var nextYear = nextYearPlayers.FirstOrDefault(x => x.UniqueIndex == player.UniqueIndex);
+            if (nextYear != null)
+            {
+                playerResults.NextRanking = nextYear.Ranking;
+                playerResults.NextRankingValue = RankingValueConverter.Get(competition, nextYear.Ranking);
+
+                MatchEntity[] games = [.. matches.Where(x => x.Home.PlayerUniqueIndex == player.UniqueIndex)];
+                foreach (var game in games)
+                {
+                    var opponent = playerLookup[game.Away.PlayerUniqueIndex];
+                    bool won = game.Home.SetCount > game.Away.SetCount;
+                    playerResults.AddGame(opponent.Ranking, won);
+                }
+
+                games = [.. matches.Where(x => x.Away.PlayerUniqueIndex == player.UniqueIndex)];
+                foreach (var game in games)
+                {
+                    var opponent = playerLookup[game.Home.PlayerUniqueIndex];
+                    bool won = game.Away.SetCount > game.Home.SetCount;
+                    playerResults.AddGame(opponent.Ranking, won);
+                }
+
+                await _db.PlayerResults.AddAsync(playerResults);
+
+                counter++;
+                if (counter % BatchSize == 0)
+                    await _db.SaveChangesAsync();
+            }
+        }
+
+        await _db.SaveChangesAsync();
+    }
+}

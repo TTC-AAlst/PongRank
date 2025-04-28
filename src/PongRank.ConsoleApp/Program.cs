@@ -3,13 +3,13 @@ using Microsoft.Extensions.Hosting;
 using PongRank.ConsoleApp;
 using PongRank.ConsoleApp.Utilities;
 using PongRank.DataAccess;
+using PongRank.DataEntities.Core;
 using PongRank.FrenoyApi;
 using PongRank.Model.Startup;
 using Serilog;
 
 Console.WriteLine("PongRank Startup");
 
-// TODO: console.txt file does not show up
 SetupLogger.Configure("console.txt");
 
 var host = Host.CreateDefaultBuilder(args)
@@ -17,6 +17,7 @@ var host = Host.CreateDefaultBuilder(args)
     {
         var (settings, configuration) = LoadSettings.Configure<ConsoleSettings>(services);
         services.AddScoped<FrenoyApiClient>();
+        services.AddScoped<AggregateService>();
         GlobalBackendConfiguration.Configure(services, configuration);
         services.AddHostedService<PongRankService>();
     })

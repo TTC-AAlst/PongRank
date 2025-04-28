@@ -1,9 +1,11 @@
-﻿namespace PongRank.DataAccess.Utilities;
+﻿using PongRank.Model;
+
+namespace PongRank.DataAccess.Utilities;
 
 /// <summary>
 /// Convert a ranking in Vttl/Sporta to its competition value
 /// </summary>
-internal class RankingValueConverter
+public static class RankingValueConverter
 {
     private static readonly IDictionary<string, int> _sporta;
     private static readonly IDictionary<string, int> _vttl;
@@ -54,6 +56,14 @@ internal class RankingValueConverter
             ["F"] = 2,
             ["NG"] = 1
         };
+    }
+
+    public static int Get(Competition competition, string ranking)
+    {
+        if (competition == Competition.Vttl)
+            return Vttl(ranking);
+
+        return Sporta(ranking);
     }
 
     public static int Vttl(string ranking)

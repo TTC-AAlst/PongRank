@@ -1,4 +1,5 @@
-﻿using System.Diagnostics;
+﻿using System;
+using System.Diagnostics;
 using FrenoyVttl;
 using Microsoft.EntityFrameworkCore;
 using PongRank.DataEntities;
@@ -13,12 +14,12 @@ public class FrenoyApiClient
     #region Fields
     private const string FrenoyVttlEndpoint = "https://api.vttl.be/index.php?s=vttl";
     private const string FrenoySportaEndpoint = "https://ttonline.sporta.be/api/index.php?s=sporcrea";
+    private static readonly TimeZoneInfo BelgianTimeZone = TimeZoneInfo.FindSystemTimeZoneById("Romance Standard Time");
 
     private FrenoySettings _settings;
     private TabTAPI_PortTypeClient _frenoy;
     private readonly ITtcDbContext _db;
     private readonly TtcLogger _logger;
-
     #endregion
 
     #region Constructor
@@ -124,11 +125,14 @@ public class FrenoyApiClient
             if (game.AwaySetCount == null || game.HomeSetCount == null)
                 continue;
 
+            var unspecifiedDate = match.Date.Add(match.Time.TimeOfDay);
+            var date = new DateTimeOffset(unspecifiedDate, BelgianTimeZone.GetUtcOffset(unspecifiedDate));
+
             var matchEntity = new MatchEntity()
             {
                 Competition = _settings.Competition,
                 Year = _settings.Year,
-                Date = match.Date.Add(match.Time.TimeOfDay).ToUniversalTime(),
+                Date = date.UtcDateTime,
                 WeekName = match.WeekName,
                 MatchId = match.MatchId,
                 MatchUniqueId = int.Parse(match.MatchUniqueId),
