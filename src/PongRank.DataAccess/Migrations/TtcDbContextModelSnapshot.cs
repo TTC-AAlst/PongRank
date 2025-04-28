@@ -47,9 +47,8 @@ namespace PongRank.DataAccess.Migrations
                         .HasMaxLength(50)
                         .HasColumnType("character varying(50)");
 
-                    b.Property<string>("UniqueIndex")
-                        .HasMaxLength(10)
-                        .HasColumnType("character varying(10)");
+                    b.Property<int>("UniqueIndex")
+                        .HasColumnType("integer");
 
                     b.Property<int>("Year")
                         .HasColumnType("integer");
@@ -81,10 +80,8 @@ namespace PongRank.DataAccess.Migrations
                         .HasMaxLength(20)
                         .HasColumnType("character varying(20)");
 
-                    b.Property<string>("MatchUniqueId")
-                        .IsRequired()
-                        .HasMaxLength(20)
-                        .HasColumnType("character varying(20)");
+                    b.Property<int>("MatchUniqueId")
+                        .HasColumnType("integer");
 
                     b.Property<string>("WeekName")
                         .IsRequired()
@@ -107,9 +104,8 @@ namespace PongRank.DataAccess.Migrations
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
-                    b.Property<string>("Club")
-                        .HasMaxLength(10)
-                        .HasColumnType("character varying(10)");
+                    b.Property<int>("Club")
+                        .HasColumnType("integer");
 
                     b.Property<string>("Competition")
                         .IsRequired()
@@ -134,10 +130,8 @@ namespace PongRank.DataAccess.Migrations
                         .HasMaxLength(5)
                         .HasColumnType("character varying(5)");
 
-                    b.Property<string>("UniqueIndex")
-                        .IsRequired()
-                        .HasMaxLength(10)
-                        .HasColumnType("character varying(10)");
+                    b.Property<int>("UniqueIndex")
+                        .HasColumnType("integer");
 
                     b.Property<int>("Year")
                         .HasColumnType("integer");
@@ -156,20 +150,8 @@ namespace PongRank.DataAccess.Migrations
                             b1.Property<int>("MatchEntityId")
                                 .HasColumnType("integer");
 
-                            b1.Property<string>("FirstName")
-                                .IsRequired()
-                                .HasMaxLength(100)
-                                .HasColumnType("character varying(100)");
-
-                            b1.Property<string>("LastName")
-                                .IsRequired()
-                                .HasMaxLength(100)
-                                .HasColumnType("character varying(100)");
-
-                            b1.Property<string>("PlayerUniqueIndex")
-                                .IsRequired()
-                                .HasMaxLength(10)
-                                .HasColumnType("character varying(10)");
+                            b1.Property<int>("PlayerUniqueIndex")
+                                .HasColumnType("integer");
 
                             b1.Property<int>("SetCount")
                                 .HasColumnType("integer");
@@ -187,20 +169,8 @@ namespace PongRank.DataAccess.Migrations
                             b1.Property<int>("MatchEntityId")
                                 .HasColumnType("integer");
 
-                            b1.Property<string>("FirstName")
-                                .IsRequired()
-                                .HasMaxLength(100)
-                                .HasColumnType("character varying(100)");
-
-                            b1.Property<string>("LastName")
-                                .IsRequired()
-                                .HasMaxLength(100)
-                                .HasColumnType("character varying(100)");
-
-                            b1.Property<string>("PlayerUniqueIndex")
-                                .IsRequired()
-                                .HasMaxLength(10)
-                                .HasColumnType("character varying(10)");
+                            b1.Property<int>("PlayerUniqueIndex")
+                                .HasColumnType("integer");
 
                             b1.Property<int>("SetCount")
                                 .HasColumnType("integer");

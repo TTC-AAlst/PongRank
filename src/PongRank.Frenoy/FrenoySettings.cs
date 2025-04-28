@@ -7,15 +7,15 @@ public class FrenoySettings
 {
     public Competition Competition { get; }
     public int Year { get; }
-    public ClubCategory[] Categories { get; }
+    public string[] CategoryNames { get; } = [];
     public int FrenoySeason => Year - 2000 + 1;
 
     
-    public FrenoySettings(Competition competition, int year, ClubCategory[] categories)
+    public FrenoySettings(Competition competition, int year, string[] categoryNames)
     {
         Competition = competition;
         Year = year;
-        Categories = categories;
+        CategoryNames = categoryNames;
         if (year < 1000)
         {
             Year = year + 2000 - 1;

@@ -20,8 +20,7 @@ public class MatchEntity
 
     [MaxLength(20)]
     public string MatchId { get; set; } = "";
-    [MaxLength(20)]
-    public string MatchUniqueId { get; set; } = "";
+    public int MatchUniqueId { get; set; }
 
     public MatchEntityPlayer Home { get; set; } = new();
     public MatchEntityPlayer Away { get; set; } = new();
@@ -32,6 +31,6 @@ public class MatchEntity
     public override string ToString()
     {
         var str = $"Id={Id}, Date={Date:d} {Date:HH\\:mm}";
-        return $"{str}, {Home.Name} vs {Away.Name}: {Score}";
+        return $"{str}, {Home.PlayerUniqueIndex} vs {Away.PlayerUniqueIndex}: {Score}";
     }
 }

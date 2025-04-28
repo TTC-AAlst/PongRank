@@ -26,7 +26,7 @@ public class FrenoyApiClient
     {
         _db = ttcDbContext;
         _logger = logger;
-        _settings = new FrenoySettings(Competition.Vttl, DateTime.Now.Year, [ClubCategory.OostVlaanderen]);
+        _settings = new FrenoySettings(Competition.Vttl, DateTime.Now.Year, ["OostVlaanderen"]);
         _frenoy = new TabTAPI_PortTypeClient();
     }
 
@@ -69,7 +69,9 @@ public class FrenoyApiClient
 
     private async Task SyncMatches(List<ClubEntity> clubs)
     {
-        var toSyncClubs = clubs.Where(x => _settings.Categories.Contains(x.Category)).ToArray();
+        var toSyncClubs = clubs.ToArray();
+        if (_settings.CategoryNames.Length > 0)
+            toSyncClubs = [..toSyncClubs.Where(x => _settings.CategoryNames.Contains(x.CategoryName))];
 
         var matchEntities = await _db.Matches
             .Where(x => x.Competition == _settings.Competition)
@@ -81,13 +83,13 @@ public class FrenoyApiClient
             var matches = await _frenoy.GetMatchesAsync(new GetMatchesRequest1(new GetMatchesRequest()
             {
                 Season = _settings.FrenoySeason.ToString(),
-                Club = club.UniqueIndex,
+                Club = club.UniqueIndex.ToString(),
                 WithDetails = true,
                 WithDetailsSpecified = true,
             }));
 
             _logger.Information($"Syncing #{matches.GetMatchesResponse.MatchCount} Matches for {club.Name} ({club.CategoryName})");
-            foreach (var match in matches.GetMatchesResponse.TeamMatchesEntries)
+            foreach (var match in matches.GetMatchesResponse.TeamMatchesEntries ?? [])
             {
                 await SyncMatch(match, matchEntities);
             }
@@ -105,7 +107,10 @@ public class FrenoyApiClient
         if (match.IsAwayForfeited || match.IsHomeForfeited)
             return;
 
-        if (matchEntities.Any(x => x.MatchUniqueId == match.MatchUniqueId))
+        if (match.Score == null)
+            return;
+
+        if (matchEntities.Any(x => x.MatchUniqueId == int.Parse(match.MatchUniqueId)))
             return;
 
         foreach (var game in match.MatchDetails.IndividualMatchResults)
@@ -113,32 +118,28 @@ public class FrenoyApiClient
             if (game.IsAwayForfeited || game.IsHomeForfeited)
                 continue;
 
-            if (game.AwayPlayer.Length != 1 || game.HomePlayer.Length != 1)
+            if (game.AwayPlayerUniqueIndex.Length != 1 || game.HomePlayerUniqueIndex.Length != 1)
                 continue;
 
-            if (game.AwaySetCount == "0" && game.HomeSetCount == "0")
+            if (game.AwaySetCount == null || game.HomeSetCount == null)
                 continue;
 
             var matchEntity = new MatchEntity()
             {
                 Competition = _settings.Competition,
                 Year = _settings.Year,
-                Date = match.Date.Add(match.Time.TimeOfDay),
+                Date = match.Date.Add(match.Time.TimeOfDay).ToUniversalTime(),
                 WeekName = match.WeekName,
                 MatchId = match.MatchId,
-                MatchUniqueId = match.MatchUniqueId,
+                MatchUniqueId = int.Parse(match.MatchUniqueId),
                 Away = new MatchEntityPlayer()
                 {
-                    FirstName = game.AwayPlayer.Single().FirstName,
-                    LastName = game.AwayPlayer.Single().LastName,
-                    PlayerUniqueIndex = game.AwayPlayer.Single().UniqueIndex,
+                    PlayerUniqueIndex = int.Parse(game.AwayPlayerUniqueIndex.Single()),
                     SetCount = int.Parse(game.AwaySetCount),
                 },
                 Home = new MatchEntityPlayer()
                 {
-                    FirstName = game.HomePlayer.Single().FirstName,
-                    LastName = game.HomePlayer.Single().LastName,
-                    PlayerUniqueIndex = game.HomePlayer.Single().UniqueIndex,
+                    PlayerUniqueIndex = int.Parse(game.HomePlayerUniqueIndex.Single()),
                     SetCount = int.Parse(game.HomeSetCount),
                 }
             };
@@ -169,8 +170,8 @@ public class FrenoyApiClient
                 Name = club.Name,
                 Competition = _settings.Competition,
                 Year = _settings.Year,
-                UniqueIndex = club.UniqueIndex,
-                Category = (ClubCategory)int.Parse(club.Category),
+                UniqueIndex = int.Parse(club.UniqueIndex),
+                Category = int.Parse(club.Category),
                 CategoryName = club.CategoryName,
             };
             await _db.Clubs.AddAsync(clubEntity);
@@ -205,10 +206,10 @@ public class FrenoyApiClient
             {
                 Competition = _settings.Competition,
                 Year = _settings.Year,
-                UniqueIndex = member.UniqueIndex,
+                UniqueIndex = int.Parse(member.UniqueIndex),
                 FirstName = member.FirstName,
                 LastName = member.LastName,
-                Club = member.Club,
+                Club = int.Parse(member.Club),
                 Ranking = member.Ranking,
             };
             await _db.Players.AddAsync(player);

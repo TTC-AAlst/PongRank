@@ -32,7 +32,7 @@ public class PongRankService : IHostedService
         {
             foreach (int year in _settings.Seasons)
             {
-                var frenoySettings = new FrenoySettings(competition, year, _settings.Categories);
+                var frenoySettings = new FrenoySettings(competition, year, _settings.CategoryNames);
                 _logger.Information($"Sync for {competition} {frenoySettings.Year} ({frenoySettings.FrenoySeason})");
                 _frenoyClient.Open(frenoySettings);
                 await _frenoyClient.Sync();
