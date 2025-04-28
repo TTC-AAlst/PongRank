@@ -1,0 +1,42 @@
+version: '3.8'
+
+services:
+  db:
+    image: postgres:16
+    container_name: pongrank-db
+    restart: always
+    environment:
+      POSTGRES_USER: ponguser
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+      POSTGRES_DB: PongRank
+    ports:
+      - "5432:5432"
+    networks:
+      - pongranknet
+    volumes:
+      - db-data:/var/lib/postgresql/data
+
+  # webapi:
+  #   build:
+  #     context: ./
+  #     dockerfile: ./src/PongRank.WebApi/Dockerfile
+  #   container_name: pongrank-backend
+  #   restart: always
+  #   ports:
+  #     - "7200:8080"
+  #   networks:
+  #     - pongranknet
+  #   environment:
+  #     - ASPNETCORE_ENVIRONMENT=Release
+  #     - DB_PASSWORD=${DB_PASSWORD}
+  #   volumes:
+  #     - /volume1/Projects/PongRank-Logs:/app/logs
+  #   depends_on:
+  #     - db
+
+volumes:
+  db-data:
+
+networks:
+  pongranknet:
+    driver: bridge
