@@ -64,24 +64,30 @@ public class FrenoyApiClient
     public async Task Sync()
     {
         List<ClubEntity> clubs = await SyncClubs();
-        await SyncPlayers();
+        await SyncPlayers(clubs);
         await SyncMatches(clubs);
+
+        // await SyncTournaments();
     }
 
     private async Task SyncMatches(List<ClubEntity> clubs)
     {
-        var toSyncClubs = clubs.ToArray();
+        var toSyncClubs = clubs.Where(x => !x.SyncCompleted).ToArray();
         if (_settings.CategoryNames.Length > 0)
             toSyncClubs = [..toSyncClubs.Where(x => _settings.CategoryNames.Contains(x.CategoryName))];
 
-        var matchEntities = await _db.Matches
+        var matchUniqueIds = await _db.Matches
             .Where(x => x.Competition == _settings.Competition)
             .Where(x => x.Year == _settings.Year)
+            .Select(x => x.MatchUniqueId)
             .ToListAsync();
 
         foreach (var club in toSyncClubs)
         {
-            var matches = await _frenoy.GetMatchesAsync(new GetMatchesRequest1(new GetMatchesRequest()
+            Debug.Assert(club.Competition == _settings.Competition);
+            Debug.Assert(club.Year == _settings.Year);
+
+            var matchesResponse = await _frenoy.GetMatchesAsync(new GetMatchesRequest1(new GetMatchesRequest()
             {
                 Season = _settings.FrenoySeason.ToString(),
                 Club = club.UniqueIndex.ToString(),
@@ -89,10 +95,16 @@ public class FrenoyApiClient
                 WithDetailsSpecified = true,
             }));
 
-            _logger.Information($"Syncing #{matches.GetMatchesResponse.MatchCount} Matches for {club.Name} ({club.CategoryName})");
-            foreach (var match in matches.GetMatchesResponse.TeamMatchesEntries ?? [])
+            _logger.Information($"Syncing #{matchesResponse.GetMatchesResponse.MatchCount} Matches for {club.Name} ({club.CategoryName})");
+            var matches = matchesResponse.GetMatchesResponse.TeamMatchesEntries ?? [];
+            foreach (var match in matches)
             {
-                await SyncMatch(match, matchEntities);
+                await SyncMatch(match, matchUniqueIds);
+            }
+
+            if (matches.All(x => x.Date.AddHours(7) < DateTime.Now))
+            {
+                club.SyncCompleted = true;
             }
 
             await _db.SaveChangesAsync();
@@ -100,7 +112,7 @@ public class FrenoyApiClient
         }
     }
 
-    private async Task SyncMatch(TeamMatchEntryType match, List<MatchEntity> matchEntities)
+    private async Task SyncMatch(TeamMatchEntryType match, List<int> matchUniqueIds)
     {
         if (!match.IsValidated)
             return;
@@ -111,7 +123,7 @@ public class FrenoyApiClient
         if (match.Score == null)
             return;
 
-        if (matchEntities.Any(x => x.MatchUniqueId == int.Parse(match.MatchUniqueId)))
+        if (matchUniqueIds.Any(id => id == int.Parse(match.MatchUniqueId)))
             return;
 
         foreach (var game in match.MatchDetails.IndividualMatchResults)
@@ -148,7 +160,7 @@ public class FrenoyApiClient
                 }
             };
             await _db.Matches.AddAsync(matchEntity);
-            matchEntities.Add(matchEntity);
+            matchUniqueIds.Add(matchEntity.MatchUniqueId);
         }
     }
 
@@ -174,7 +186,7 @@ public class FrenoyApiClient
                 Name = club.Name,
                 Competition = _settings.Competition,
                 Year = _settings.Year,
-                UniqueIndex = int.Parse(club.UniqueIndex),
+                UniqueIndex = club.UniqueIndex,
                 Category = int.Parse(club.Category),
                 CategoryName = club.CategoryName,
             };
@@ -188,7 +200,7 @@ public class FrenoyApiClient
         return clubEntities;
     }
 
-    private async Task SyncPlayers()
+    private async Task SyncPlayers(ICollection<ClubEntity> clubs)
     {
         var playerEntities = await _db.Players
             .Where(x => x.Competition == _settings.Competition && x.Year == _settings.Year)
@@ -206,14 +218,21 @@ public class FrenoyApiClient
         _logger.Information($"Syncing Players (#{members.GetMembersResponse.MemberCount})");
         foreach (var member in members.GetMembersResponse.MemberEntries)
         {
+            var club = clubs.FirstOrDefault(x => x.UniqueIndex == member.Club);
+            if (club == null)
+            {
+                continue;
+            }
             var player = new PlayerEntity()
             {
                 Competition = _settings.Competition,
                 Year = _settings.Year,
+                CategoryName = club?.CategoryName ?? "",
                 UniqueIndex = int.Parse(member.UniqueIndex),
                 FirstName = member.FirstName,
                 LastName = member.LastName,
-                Club = int.Parse(member.Club),
+                Club = member.Club,
+                ClubName = club?.Name ?? "",
                 Ranking = member.Ranking,
             };
             await _db.Players.AddAsync(player);

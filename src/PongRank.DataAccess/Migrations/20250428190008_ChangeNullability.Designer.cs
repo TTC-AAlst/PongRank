@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using PongRank.DataAccess;
@@ -11,9 +12,11 @@ using PongRank.DataAccess;
 namespace PongRank.DataAccess.Migrations
 {
     [DbContext(typeof(TtcDbContext))]
-    partial class TtcDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250428190008_ChangeNullability")]
+    partial class ChangeNullability
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -47,13 +50,8 @@ namespace PongRank.DataAccess.Migrations
                         .HasMaxLength(50)
                         .HasColumnType("character varying(50)");
 
-                    b.Property<bool>("SyncCompleted")
-                        .HasColumnType("boolean");
-
-                    b.Property<string>("UniqueIndex")
-                        .IsRequired()
-                        .HasMaxLength(20)
-                        .HasColumnType("character varying(20)");
+                    b.Property<int>("UniqueIndex")
+                        .HasColumnType("integer");
 
                     b.Property<int>("Year")
                         .HasColumnType("integer");
@@ -109,20 +107,8 @@ namespace PongRank.DataAccess.Migrations
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
-                    b.Property<string>("CategoryName")
-                        .IsRequired()
-                        .HasMaxLength(50)
-                        .HasColumnType("character varying(50)");
-
-                    b.Property<string>("Club")
-                        .IsRequired()
-                        .HasMaxLength(20)
-                        .HasColumnType("character varying(20)");
-
-                    b.Property<string>("ClubName")
-                        .IsRequired()
-                        .HasMaxLength(50)
-                        .HasColumnType("character varying(50)");
+                    b.Property<int>("Club")
+                        .HasColumnType("integer");
 
                     b.Property<string>("Competition")
                         .IsRequired()
@@ -218,11 +204,6 @@ namespace PongRank.DataAccess.Migrations
                     b.Property<int>("C6Wins")
                         .HasColumnType("integer");
 
-                    b.Property<string>("CategoryName")
-                        .IsRequired()
-                        .HasMaxLength(50)
-                        .HasColumnType("character varying(50)");
-
                     b.Property<string>("Competition")
                         .IsRequired()
                         .HasColumnType("character varying(10)");
@@ -298,15 +279,19 @@ namespace PongRank.DataAccess.Migrations
                         .HasColumnType("integer");
 
                     b.Property<string>("NextRanking")
+                        .IsRequired()
                         .HasMaxLength(5)
                         .HasColumnType("character varying(5)");
+
+                    b.Property<int>("NextRankingValue")
+                        .HasColumnType("integer");
 
                     b.Property<string>("Ranking")
                         .IsRequired()
                         .HasMaxLength(5)
                         .HasColumnType("character varying(5)");
 
-                    b.Property<int>("TotalGames")
+                    b.Property<int>("RankingValue")
                         .HasColumnType("integer");
 
                     b.Property<int>("UniqueIndex")

@@ -14,20 +14,24 @@ public class PlayerResultsEntity
     [Column(TypeName = "character varying(10)")]
     public Competition Competition { get; set; }
     public int Year { get; set; }
+    [StringLength(50)]
+    public string CategoryName { get; set; } = "";
     public int UniqueIndex { get; set; }
 
     [StringLength(100)]
     public string FirstName { get; set; } = "";
     [StringLength(100)]
     public string LastName { get; set; } = "";
+    [NotMapped]
+    public string Name => $"{FirstName} {LastName}";
 
     [StringLength(5)]
     public string Ranking { get; set; } = "";
-    public int RankingValue { get; set; }
 
     [StringLength(5)]
     public string? NextRanking { get; set; }
-    public int? NextRankingValue { get; set; }
+
+    public int TotalGames { get; set; }
 
     public int AWins { get; set; }
     public int ALosses { get; set; }

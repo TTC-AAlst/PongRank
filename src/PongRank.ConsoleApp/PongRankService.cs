@@ -2,6 +2,7 @@
 using PongRank.ConsoleApp.Utilities;
 using PongRank.DataEntities.Core;
 using PongRank.FrenoyApi;
+using PongRank.ML;
 using PongRank.Model.Core;
 
 namespace PongRank.ConsoleApp;
@@ -13,19 +14,22 @@ public class PongRankService : IHostedService
     private readonly FrenoyApiClient _frenoyClient;
     private readonly TtcLogger _logger;
     private readonly AggregateService _aggregateService;
+    private readonly TrainingService _trainingService;
 
     public PongRankService(
         ConsoleSettings settings,
         ITtcDbContext db,
         FrenoyApiClient frenoyClient,
         TtcLogger logger,
-        AggregateService aggregateService)
+        AggregateService aggregateService,
+        TrainingService trainingService)
     {
         _settings = settings;
         _db = db;
         _frenoyClient = frenoyClient;
         _logger = logger;
         _aggregateService = aggregateService;
+        _trainingService = trainingService;
     }
 
     public async Task StartAsync(CancellationToken cancellationToken)
@@ -49,6 +53,11 @@ public class PongRankService : IHostedService
                 {
                     await _aggregateService.CalculateAndSave(competition, year);
                 }
+            }
+
+            if (_settings.Train)
+            {
+                await _trainingService.Train(competition, _settings.Seasons);
             }
         }
         _logger.Information("PongRank Sync DONE");

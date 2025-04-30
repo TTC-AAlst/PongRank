@@ -1,5 +1,4 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using PongRank.DataAccess.Utilities;
 using PongRank.DataEntities;
 using PongRank.DataEntities.Core;
 using PongRank.Model;
@@ -38,10 +37,10 @@ public class AggregateService
             {
                 Competition = competition,
                 Year = year,
+                CategoryName = player.CategoryName,
                 FirstName = player.FirstName,
                 LastName = player.LastName,
                 Ranking = player.Ranking,
-                RankingValue = RankingValueConverter.Get(competition, player.Ranking),
                 UniqueIndex = player.UniqueIndex,
             };
 
@@ -49,24 +48,28 @@ public class AggregateService
             if (nextYear != null)
             {
                 playerResults.NextRanking = nextYear.Ranking;
-                playerResults.NextRankingValue = RankingValueConverter.Get(competition, nextYear.Ranking);
+            }
 
-                MatchEntity[] games = [.. matches.Where(x => x.Home.PlayerUniqueIndex == player.UniqueIndex)];
-                foreach (var game in games)
-                {
-                    var opponent = playerLookup[game.Away.PlayerUniqueIndex];
-                    bool won = game.Home.SetCount > game.Away.SetCount;
-                    playerResults.AddGame(opponent.Ranking, won);
-                }
+            MatchEntity[] games = [.. matches.Where(x => x.Home.PlayerUniqueIndex == player.UniqueIndex)];
+            playerResults.TotalGames += games.Length;
+            foreach (var game in games)
+            {
+                var opponent = playerLookup[game.Away.PlayerUniqueIndex];
+                bool won = game.Home.SetCount > game.Away.SetCount;
+                playerResults.AddGame(opponent.Ranking, won);
+            }
 
-                games = [.. matches.Where(x => x.Away.PlayerUniqueIndex == player.UniqueIndex)];
-                foreach (var game in games)
-                {
-                    var opponent = playerLookup[game.Home.PlayerUniqueIndex];
-                    bool won = game.Away.SetCount > game.Home.SetCount;
-                    playerResults.AddGame(opponent.Ranking, won);
-                }
+            games = [.. matches.Where(x => x.Away.PlayerUniqueIndex == player.UniqueIndex)];
+            playerResults.TotalGames += games.Length;
+            foreach (var game in games)
+            {
+                var opponent = playerLookup[game.Home.PlayerUniqueIndex];
+                bool won = game.Away.SetCount > game.Home.SetCount;
+                playerResults.AddGame(opponent.Ranking, won);
+            }
 
+            if (playerResults.TotalGames > 8)
+            {
                 await _db.PlayerResults.AddAsync(playerResults);
 
                 counter++;

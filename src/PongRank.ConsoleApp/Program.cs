@@ -5,6 +5,7 @@ using PongRank.ConsoleApp.Utilities;
 using PongRank.DataAccess;
 using PongRank.DataEntities.Core;
 using PongRank.FrenoyApi;
+using PongRank.ML;
 using PongRank.Model.Startup;
 using Serilog;
 
@@ -18,6 +19,7 @@ var host = Host.CreateDefaultBuilder(args)
         var (settings, configuration) = LoadSettings.Configure<ConsoleSettings>(services);
         services.AddScoped<FrenoyApiClient>();
         services.AddScoped<AggregateService>();
+        services.AddScoped<TrainingService>();
         GlobalBackendConfiguration.Configure(services, configuration);
         services.AddHostedService<PongRankService>();
     })

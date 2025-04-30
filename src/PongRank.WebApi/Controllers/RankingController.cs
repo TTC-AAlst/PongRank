@@ -1,6 +1,6 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using PongRank.Model;
+using PongRank.ML;
 
 namespace PongRank.WebApi.Controllers;
 
@@ -8,17 +8,17 @@ namespace PongRank.WebApi.Controllers;
 [Route("api/ranking")]
 public class RankingController
 {
-    //private readonly RankingService _service;
+    private readonly PredictionService _service;
 
-    //public RankingController(RankingService service)
-    //{
-    //    _service = service;
-    //}
+    public RankingController(PredictionService service)
+    {
+        _service = service;
+    }
 
     [HttpGet]
     [AllowAnonymous]
-    public Task<string> Get(Competition competition, int uniqueIndex, int season)
+    public Task<IEnumerable<PredictionResult>> Get(PredictionRequest request)
     {
-        return Task.FromResult("E6");
+        return _service.Predict(request);
     }
 }

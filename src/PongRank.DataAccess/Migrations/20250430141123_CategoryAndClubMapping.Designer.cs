@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using PongRank.DataAccess;
@@ -11,9 +12,11 @@ using PongRank.DataAccess;
 namespace PongRank.DataAccess.Migrations
 {
     [DbContext(typeof(TtcDbContext))]
-    partial class TtcDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250430141123_CategoryAndClubMapping")]
+    partial class CategoryAndClubMapping
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -298,15 +301,19 @@ namespace PongRank.DataAccess.Migrations
                         .HasColumnType("integer");
 
                     b.Property<string>("NextRanking")
+                        .IsRequired()
                         .HasMaxLength(5)
                         .HasColumnType("character varying(5)");
+
+                    b.Property<int>("NextRankingValue")
+                        .HasColumnType("integer");
 
                     b.Property<string>("Ranking")
                         .IsRequired()
                         .HasMaxLength(5)
                         .HasColumnType("character varying(5)");
 
-                    b.Property<int>("TotalGames")
+                    b.Property<int>("RankingValue")
                         .HasColumnType("integer");
 
                     b.Property<int>("UniqueIndex")

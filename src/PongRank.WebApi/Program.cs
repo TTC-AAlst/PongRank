@@ -3,6 +3,7 @@ using System.Text.Json.Serialization;
 using PongRank.Model.Startup;
 using PongRank.WebApi.Utilities;
 using PongRank.DataAccess;
+using PongRank.ML;
 
 SetupLogger.Configure("webapi.txt");
 
@@ -28,12 +29,11 @@ try
     });
     builder.Services.AddEndpointsApiExplorer();
     AddSwagger.Configure(builder.Services);
-    
+    GlobalBackendConfiguration.Configure(builder.Services, configuration);
+    builder.Services.AddScoped<PredictionService>();
+
     builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
     builder.Services.AddProblemDetails();
-
-    //builder.Services.AddServiceModelServices().AddServiceModelMetadata();
-    //builder.Services.AddSingleton<IServiceBehavior, UseRequestHeadersForMetadataAddressBehavior>();
 
     var app = builder.Build();
     if (app.Environment.IsDevelopment())
@@ -47,9 +47,6 @@ try
     {
         Log.Information("Starting Release Server");
     }
-
-    //var serviceMetadataBehavior = app.Services.GetRequiredService<CoreWCF.Description.ServiceMetadataBehavior>();
-    //serviceMetadataBehavior.HttpGetEnabled = true;
 
     app.UseCors("CorsPolicy");
 

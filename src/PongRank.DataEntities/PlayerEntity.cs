@@ -15,6 +15,11 @@ public class PlayerEntity
     [Column(TypeName = "character varying(10)")]
     public Competition Competition { get; set; }
     public int Year { get; set; }
+    [StringLength(50)]
+    public string CategoryName { get; set; } = "";
+    [StringLength(50)]
+    public string ClubName { get; set; } = "";
+
     public int UniqueIndex { get; set; }
 
     [StringLength(100)]
@@ -24,7 +29,8 @@ public class PlayerEntity
 
     [StringLength(5)]
     public string Ranking { get; set; } = "";
-    public int Club { get; set; }
+    [StringLength(20)]
+    public string Club { get; set; } = "";
 
     public override string ToString() => $"Id={Id}, Name={FirstName} {LastName}, {Competition}={Ranking}";
 }

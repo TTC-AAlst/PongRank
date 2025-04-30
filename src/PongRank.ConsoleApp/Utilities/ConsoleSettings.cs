@@ -11,6 +11,7 @@ public class ConsoleSettings
     public string[] CategoryNames { get; set; } = [];
 
     public bool AggregateResults { get; set; }
+    public bool Train { get; set; }
 
     public override string ToString() => $"{string.Join(';', Competitions)} for seasons={string.Join(';', Seasons)}";
 }

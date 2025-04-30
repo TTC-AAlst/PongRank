@@ -22,11 +22,19 @@
 
   <ItemGroup>
     <Folder Include="logs\" />
+    <Folder Include="Resources\" />
   </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\PongRank.DataAccess\PongRank.DataAccess.csproj" />
+    <ProjectReference Include="..\PongRank.ML\PongRank.ML.csproj" />
     <ProjectReference Include="..\PongRank.Model\PongRank.Model.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Update="Resources\SportaRankingModel.zip">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
   </ItemGroup>
 
 </Project>
