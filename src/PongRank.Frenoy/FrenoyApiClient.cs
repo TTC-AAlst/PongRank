@@ -131,7 +131,7 @@ public class FrenoyApiClient
             if (game.IsAwayForfeited || game.IsHomeForfeited)
                 continue;
 
-            if (game.AwayPlayerUniqueIndex.Length != 1 || game.HomePlayerUniqueIndex.Length != 1)
+            if (game.AwayPlayerUniqueIndex is not { Length: 1 } || game.HomePlayerUniqueIndex is not { Length: 1 })
                 continue;
 
             if (game.AwaySetCount == null || game.HomeSetCount == null)
