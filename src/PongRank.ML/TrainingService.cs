@@ -27,6 +27,7 @@ namespace PongRank.ML
 
             var pipeline = mlContext
                 .Transforms.Conversion.MapValueToKey(inputColumnName: nameof(PlayerResultsInput.NextRanking), outputColumnName: "Label")
+                .Append(mlContext.Transforms.Categorical.OneHotEncoding("CategoryNameEncoded", nameof(PlayerResultsInput.CategoryName)))
                 .Append(mlContext.Transforms.Concatenate("Features", GetInputColumnNames(competition)))
                 .AppendCacheCheckpoint(mlContext)
                 .Append(mlContext.MulticlassClassification.Trainers.LightGbm("Label", "Features"))
@@ -42,7 +43,7 @@ namespace PongRank.ML
             {
                 nameof(PlayerResultsInput.Competition),
                 nameof(PlayerResultsInput.Year),
-                // nameof(PlayerResultsInput.CategoryName),
+                "CategoryNameEncoded",
                 nameof(PlayerResultsInput.RankingValue),
                 nameof(PlayerResultsInput.AWins),
                 nameof(PlayerResultsInput.ALosses),
