@@ -50,7 +50,9 @@ public class PredictionService
             NewRanking = prediction.Ranking,
             UniqueIndex = player.UniqueIndex,
             Name = player.Name
-        }).Where(x => x.OldRanking != x.NewRanking).ToArray();
+        })
+            .Where(x => x.OldRanking != x.NewRanking)
+            .ToArray();
 
         return result;
     }

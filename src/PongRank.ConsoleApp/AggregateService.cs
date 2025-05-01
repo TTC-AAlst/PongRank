@@ -2,6 +2,7 @@
 using PongRank.DataEntities;
 using PongRank.DataEntities.Core;
 using PongRank.Model;
+using PongRank.Model.Core;
 
 namespace PongRank.ConsoleApp;
 
@@ -12,10 +13,12 @@ public class AggregateService
 {
     private const int BatchSize = 100;
     private readonly ITtcDbContext _db;
+    private readonly TtcLogger _logger;
 
-    public AggregateService(ITtcDbContext db)
+    public AggregateService(ITtcDbContext db, TtcLogger logger)
     {
         _db = db;
+        _logger = logger;
     }
 
     public async Task CalculateAndSave(Competition competition, int year)
@@ -31,6 +34,7 @@ public class AggregateService
         int counter = 0;
 
         var playerLookup = players.ToDictionary(x => x.UniqueIndex, x => x);
+        _logger.Information($"Aggregating for #{players.Length} players");
         foreach (var player in players)
         {
             var playerResults = new PlayerResultsEntity()

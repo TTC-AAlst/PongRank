@@ -3,7 +3,6 @@ using Microsoft.Extensions.Hosting;
 using PongRank.ConsoleApp;
 using PongRank.ConsoleApp.Utilities;
 using PongRank.DataAccess;
-using PongRank.DataEntities.Core;
 using PongRank.FrenoyApi;
 using PongRank.ML;
 using PongRank.Model.Startup;

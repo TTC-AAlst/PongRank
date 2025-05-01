@@ -1,6 +1,5 @@
 ﻿using Microsoft.Extensions.Hosting;
 using PongRank.ConsoleApp.Utilities;
-using PongRank.DataEntities.Core;
 using PongRank.FrenoyApi;
 using PongRank.ML;
 using PongRank.Model.Core;
@@ -46,18 +45,22 @@ public class PongRankService : IHostedService
                     _logger.Information($"FrenoySync for {competition} {frenoySettings.Year} ({frenoySettings.FrenoySeason})");
                     _frenoyClient.Open(frenoySettings);
                     await _frenoyClient.Sync();
-                    _logger.Information("FrenoySync Completed");
+                    _logger.Information($"FrenoySync {competition} {frenoySettings.Year}: Completed");
                 }
 
                 if (_settings.AggregateResults)
                 {
+                    _logger.Information("Aggregating Frenoy Results for ML");
                     await _aggregateService.CalculateAndSave(competition, year);
+                    _logger.Information("Aggregating Frenoy Results for ML: DONE");
                 }
             }
 
             if (_settings.Train)
             {
+                _logger.Information("Start Training ML");
                 await _trainingService.Train(competition, _settings.Seasons);
+                _logger.Information("Start Training ML: DONE");
             }
         }
         _logger.Information("PongRank Sync DONE");

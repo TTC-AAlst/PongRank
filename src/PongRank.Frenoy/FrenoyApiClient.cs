@@ -1,5 +1,4 @@
-﻿using System;
-using System.Diagnostics;
+﻿using System.Diagnostics;
 using FrenoyVttl;
 using Microsoft.EntityFrameworkCore;
 using PongRank.DataEntities;
@@ -90,7 +89,7 @@ public class FrenoyApiClient
             var matchesResponse = await _frenoy.GetMatchesAsync(new GetMatchesRequest1(new GetMatchesRequest()
             {
                 Season = _settings.FrenoySeason.ToString(),
-                Club = club.UniqueIndex.ToString(),
+                Club = club.UniqueIndex,
                 WithDetails = true,
                 WithDetailsSpecified = true,
             }));
@@ -102,13 +101,23 @@ public class FrenoyApiClient
                 await SyncMatch(match, matchUniqueIds);
             }
 
-            if (matches.All(x => x.Date.AddHours(7) < DateTime.Now))
+            var futureMatches = matches
+                .Where(x => x.Date.AddHours(7) >= DateTime.Now)
+                .ToArray();
+            if (futureMatches.Length == 0)
             {
                 club.SyncCompleted = true;
             }
 
             await _db.SaveChangesAsync();
-            _logger.Information("Synced Matches for Club");
+            if (club.SyncCompleted)
+            {
+                _logger.Information("Synced ALL Matches for Club");
+            }
+            else
+            {
+                _logger.Information($"Synced Matches for Club: #{futureMatches.Length} remaining matches");
+            }
         }
     }
 
