@@ -9,29 +9,45 @@ namespace PongRank.ConsoleApp;
 public class PongRankService : IHostedService
 {
     private readonly ConsoleSettings _settings;
-    private readonly ITtcDbContext _db;
     private readonly FrenoyApiClient _frenoyClient;
     private readonly TtcLogger _logger;
     private readonly AggregateService _aggregateService;
     private readonly TrainingService _trainingService;
+    private readonly IHostApplicationLifetime _lifetime;
 
     public PongRankService(
         ConsoleSettings settings,
-        ITtcDbContext db,
         FrenoyApiClient frenoyClient,
         TtcLogger logger,
         AggregateService aggregateService,
-        TrainingService trainingService)
+        TrainingService trainingService,
+        IHostApplicationLifetime lifetime)
     {
         _settings = settings;
-        _db = db;
         _frenoyClient = frenoyClient;
         _logger = logger;
         _aggregateService = aggregateService;
         _trainingService = trainingService;
+        _lifetime = lifetime;
     }
 
     public async Task StartAsync(CancellationToken cancellationToken)
+    {
+        try
+        {
+            await StartAsync();
+        }
+        catch (Exception e)
+        {
+            _logger.Error(e, "Unexpected exception");
+        }
+        finally
+        {
+            _lifetime.StopApplication();
+        }
+    }
+
+    private async Task StartAsync()
     {
         foreach (var competition in _settings.Competitions)
         {
