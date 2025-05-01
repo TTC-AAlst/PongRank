@@ -1,11 +1,9 @@
-﻿using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
 using PongRank.Model.Core;
 
 namespace PongRank.WebApi.Controllers;
 
-[Authorize]
-[Route("api/config")]
+[Route("api/[controller]")]
 public class ConfigController
 {
     #region Constructor
@@ -17,9 +15,7 @@ public class ConfigController
     }
     #endregion
 
-    [HttpGet]
-    [Route("Log/Get")]
-    [AllowAnonymous]
+    [HttpGet("Logging")]
     public string GetLogging()
     {
         string logDir = Path.Combine(Directory.GetCurrentDirectory(), "logs");

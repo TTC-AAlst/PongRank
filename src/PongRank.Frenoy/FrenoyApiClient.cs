@@ -26,7 +26,7 @@ public class FrenoyApiClient
     {
         _db = ttcDbContext;
         _logger = logger;
-        _settings = new FrenoySettings(Competition.Vttl, DateTime.Now.Year, ["OostVlaanderen"]);
+        _settings = new FrenoySettings(Competition.Vttl, DateTime.Now.Year, ["Oost-Vlaanderen"]);
         _frenoy = new TabTAPI_PortTypeClient();
     }
 

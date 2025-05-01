@@ -16,10 +16,10 @@ var host = Host.CreateDefaultBuilder(args)
     .ConfigureServices((context, services) =>
     {
         var (settings, configuration) = LoadSettings.Configure<ConsoleSettings>(services);
-        services.AddScoped<FrenoyApiClient>();
-        services.AddScoped<AggregateService>();
-        services.AddScoped<TrainingService>();
+        services.AddSingleton(settings.ML);
         GlobalBackendConfiguration.Configure(services, configuration);
+        services.AddScoped<FrenoyApiClient>();
+        services.AddScoped<TrainingService>();
         services.AddHostedService<PongRankService>();
     })
     .Build();

@@ -1,5 +1,6 @@
 ﻿using Microsoft.Extensions.Hosting;
 using PongRank.ConsoleApp.Utilities;
+using PongRank.DataAccess;
 using PongRank.FrenoyApi;
 using PongRank.ML;
 using PongRank.Model.Core;
@@ -51,7 +52,7 @@ public class PongRankService : IHostedService
     {
         foreach (var competition in _settings.Competitions)
         {
-            foreach (int year in _settings.Seasons.OrderByDescending(x => x))
+            foreach (int year in _settings.Seasons)
             {
                 _logger.Information($"Start {competition} {year}");
 
@@ -67,6 +68,8 @@ public class PongRankService : IHostedService
                 if (_settings.AggregateResults)
                 {
                     _logger.Information("Aggregating Frenoy Results for ML");
+                    if (_settings.CategoryNames.Length > 0)
+                        _logger.Information("Settings.CategoryNames is set. This is ignored when aggregating results.");
                     await _aggregateService.CalculateAndSave(competition, year);
                     _logger.Information("Aggregating Frenoy Results for ML: DONE");
                 }
@@ -74,8 +77,8 @@ public class PongRankService : IHostedService
 
             if (_settings.Train)
             {
-                _logger.Information("Start Training ML");
-                await _trainingService.Train(competition, _settings.Seasons);
+                _logger.Information($"Start Training ML for {competition}");
+                await _trainingService.Train(competition);
                 _logger.Information("Start Training ML: DONE");
             }
         }

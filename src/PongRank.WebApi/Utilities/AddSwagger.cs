@@ -6,7 +6,8 @@ public static class AddSwagger
     {
         services.AddSwaggerGen(c =>
         {
-            
+            var filePath = Path.Combine(AppContext.BaseDirectory, "PongRank.WebApi.xml");
+            c.IncludeXmlComments(filePath);
         });
     }
 }

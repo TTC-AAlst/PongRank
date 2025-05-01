@@ -15,6 +15,7 @@ public static class GlobalBackendConfiguration
 
         services.AddSerilog(Log.Logger);
         services.AddSingleton<TtcLogger>();
+        services.AddScoped<AggregateService>();
     }
 
     private static void ConfigureDbContext(IServiceCollection services, IConfigurationRoot configuration)

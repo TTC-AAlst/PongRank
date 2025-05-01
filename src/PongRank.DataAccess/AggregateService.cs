@@ -4,7 +4,7 @@ using PongRank.DataEntities.Core;
 using PongRank.Model;
 using PongRank.Model.Core;
 
-namespace PongRank.ConsoleApp;
+namespace PongRank.DataAccess;
 
 /// <summary>
 /// Aggregate the <see cref="PlayerResultsEntity"/>

@@ -3,7 +3,7 @@ using Microsoft.EntityFrameworkCore.Infrastructure;
 
 namespace PongRank.DataEntities.Core;
 
-public interface ITtcDbContext
+public interface ITtcDbContext : IAsyncDisposable
 {
     DbSet<PlayerEntity> Players { get; set; }
     DbSet<ClubEntity> Clubs { get; set; }

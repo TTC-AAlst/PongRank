@@ -1,6 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.ML;
 using PongRank.DataEntities.Core;
+using PongRank.ML.Models;
 using PongRank.Model;
 
 namespace PongRank.ML
@@ -8,16 +9,18 @@ namespace PongRank.ML
     public class TrainingService
     {
         private readonly ITtcDbContext _db;
+        private readonly MLSettings _settings;
 
-        public TrainingService(ITtcDbContext db)
+        public TrainingService(ITtcDbContext db, MLSettings settings)
         {
             _db = db;
+            _settings = settings;
         }
 
-        public async Task Train(Competition competition, int[] years)
+        public async Task Train(Competition competition)
         {
             var playerResults = await _db.PlayerResults
-                .Where(x => x.Competition == competition && years.Contains(x.Year))
+                .Where(x => x.Competition == competition)
                 .Where(x => x.NextRanking != null)
                 .ToArrayAsync();
 
@@ -34,7 +37,11 @@ namespace PongRank.ML
                 .Append(mlContext.Transforms.Conversion.MapKeyToValue("PredictedLabel"));
 
             var trainingModel = pipeline.Fit(trainingData);
-            mlContext.Model.Save(trainingModel, trainingData.Schema, "SportaRankingModel.zip");
+
+            var saveLocation = $"{competition}RankingModel.zip";
+            if (!string.IsNullOrWhiteSpace(_settings.ModelLocation))
+                saveLocation = Path.Combine(_settings.ModelLocation, saveLocation);
+            mlContext.Model.Save(trainingModel, trainingData.Schema, saveLocation);
         }
 
         private static string[] GetInputColumnNames(Competition competition)

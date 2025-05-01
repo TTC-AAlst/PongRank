@@ -1,17 +1,19 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.ML;
 using PongRank.DataEntities.Core;
-using PongRank.Model;
+using PongRank.ML.Models;
 
 namespace PongRank.ML;
 
 public class PredictionService
 {
     private readonly ITtcDbContext _db;
+    private readonly MLSettings _settings;
 
-    public PredictionService(ITtcDbContext db)
+    public PredictionService(ITtcDbContext db, MLSettings settings)
     {
         _db = db;
+        _settings = settings;
     }
 
     public async Task<IEnumerable<PredictionResult>> Predict(PredictionRequest request)
@@ -31,7 +33,7 @@ public class PredictionService
 
         var playerInputs = players.Select(PlayerResultsInput.MapFromEntity).ToArray();
 
-        var fileName = Path.Combine("Resources", "SportaRankingModel.zip");
+        var fileName = Path.Combine(_settings.ModelLocation, $"{request.Competition}RankingModel.zip");
         await using var stream = new FileStream(fileName, FileMode.Open, FileAccess.Read);
         var mlContext = new MLContext();
         ITransformer model = mlContext.Model.Load(stream, out _);
@@ -56,23 +58,4 @@ public class PredictionService
 
         return result;
     }
-}
-
-public class PredictionRequest
-{
-    public Competition Competition { get; set; }
-    public int Year { get; set; }
-    public string ClubUniqueIndex { get; set; } = "";
-
-    public override string ToString() => $"{Competition} {Year}, Club={ClubUniqueIndex}";
-}
-
-public class PredictionResult
-{
-    public int UniqueIndex { get; set; }
-    public string Name { get; set; } = "";
-    public string OldRanking { get; set; } = "";
-    public string NewRanking { get; set; } = "";
-
-    public override string ToString() => $"{Name}: {OldRanking} -> {NewRanking}";
 }

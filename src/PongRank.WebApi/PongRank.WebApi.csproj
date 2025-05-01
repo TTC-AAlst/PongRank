@@ -6,6 +6,15 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <UserSecretsId>2236d208-9974-4dfe-b49c-390b76656096</UserSecretsId>
     <DockerDefaultTargetOS>Windows</DockerDefaultTargetOS>
+    <GenerateDocumentationFile>True</GenerateDocumentationFile>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+    <NoWarn>1701;1702;CS1591</NoWarn>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
+    <NoWarn>1701;1702;CS1591</NoWarn>
   </PropertyGroup>
 
   <ItemGroup>
@@ -27,6 +36,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\PongRank.DataAccess\PongRank.DataAccess.csproj" />
+    <ProjectReference Include="..\PongRank.Frenoy\PongRank.FrenoyApi.csproj" />
     <ProjectReference Include="..\PongRank.ML\PongRank.ML.csproj" />
     <ProjectReference Include="..\PongRank.Model\PongRank.Model.csproj" />
   </ItemGroup>

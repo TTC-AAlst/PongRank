@@ -1,7 +1,10 @@
 ﻿using Microsoft.ML.Data;
 
-namespace PongRank.ML;
+namespace PongRank.ML.Models;
 
+/// <summary>
+/// Prediction from the model, mapped to <see cref="PredictionResult"/>
+/// </summary>
 public class RankingPrediction
 {
     [ColumnName("PredictedLabel")]

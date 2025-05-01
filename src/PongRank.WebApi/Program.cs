@@ -4,6 +4,9 @@ using PongRank.Model.Startup;
 using PongRank.WebApi.Utilities;
 using PongRank.DataAccess;
 using PongRank.ML;
+using System.Web.Services.Description;
+using PongRank.FrenoyApi;
+using System.Runtime;
 
 SetupLogger.Configure("webapi.txt");
 
@@ -11,6 +14,7 @@ try
 {
     var builder = WebApplication.CreateBuilder(args);
     var (settings, configuration) = LoadSettings.Configure<WebApiSettings>(builder.Services);
+    builder.Services.AddSingleton(settings.ML);
     builder.Services.AddCors(options =>
     {
         options.AddPolicy("CorsPolicy", corsBuilder =>
@@ -31,6 +35,12 @@ try
     AddSwagger.Configure(builder.Services);
     GlobalBackendConfiguration.Configure(builder.Services, configuration);
     builder.Services.AddScoped<PredictionService>();
+    builder.Services.AddScoped<FrenoyApiClient>();
+    builder.Services.AddScoped<TrainingService>();
+    if (settings.StartSyncJob)
+    {
+        builder.Services.AddHostedService<FrenoySyncJob>();
+    }
 
     builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
     builder.Services.AddProblemDetails();
