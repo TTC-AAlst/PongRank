@@ -26,5 +26,5 @@ public class ClubEntity
 
     public bool SyncCompleted { get; set; }
 
-    public override string ToString() => $"Id={Id}, Name={Name}, {Competition}={UniqueIndex}";
+    public override string ToString() => $"{Competition} {Year}: {Name} ({UniqueIndex}, {CategoryName}), SyncCompleted={SyncCompleted}";
 }

@@ -32,5 +32,5 @@ public class PlayerEntity
     [StringLength(20)]
     public string Club { get; set; } = "";
 
-    public override string ToString() => $"Id={Id}, Name={FirstName} {LastName}, {Competition}={Ranking}";
+    public override string ToString() => $"{Competition} {Year}: {FirstName} {LastName} @ {ClubName} ({Ranking})";
 }

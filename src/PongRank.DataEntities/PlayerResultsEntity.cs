@@ -157,5 +157,5 @@ public class PlayerResultsEntity
         }
     }
 
-    public override string ToString() => $"{Competition} {Year}: {FirstName} {LastName}: {Ranking} -> {NextRanking}";
+    public override string ToString() => $"{Competition} {Year}: {FirstName} {LastName}: {Ranking} -> {NextRanking} (#{TotalGames})";
 }

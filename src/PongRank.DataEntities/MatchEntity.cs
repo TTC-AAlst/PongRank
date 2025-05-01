@@ -28,9 +28,5 @@ public class MatchEntity
     [NotMapped]
     public string Score => $"{Home.SetCount}-{Away.SetCount}";
 
-    public override string ToString()
-    {
-        var str = $"Id={Id}, Date={Date:d} {Date:HH\\:mm}";
-        return $"{str}, {Home.PlayerUniqueIndex} vs {Away.PlayerUniqueIndex}: {Score}";
-    }
+    public override string ToString() => $"{Competition} {Year}: {Home.PlayerUniqueIndex} vs {Away.PlayerUniqueIndex}: {Score}";
 }
