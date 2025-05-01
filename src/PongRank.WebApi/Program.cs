@@ -4,9 +4,7 @@ using PongRank.Model.Startup;
 using PongRank.WebApi.Utilities;
 using PongRank.DataAccess;
 using PongRank.ML;
-using System.Web.Services.Description;
 using PongRank.FrenoyApi;
-using System.Runtime;
 
 SetupLogger.Configure("webapi.txt");
 
@@ -22,8 +20,7 @@ try
             corsBuilder
                 .WithOrigins(settings.Origins)
                 .AllowAnyHeader()
-                .AllowAnyMethod()
-                .AllowCredentials();
+                .AllowAnyMethod();
         });
     });
     
