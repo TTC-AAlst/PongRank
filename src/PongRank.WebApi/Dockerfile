@@ -1,6 +1,10 @@
 FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
 
-RUN apt-get update && apt-get install -y libgomp1
+RUN apt-get update
+RUN apt-get install git clang-3.9 cmake libunwind8 curl libomp-dev -y 
+RUN git clone --recursive https://github.com/microsoft/LightGBM.git && \
+    cd LightGBM && mkdir build && cd build && \
+    cmake .. && make -j && make install
 
 WORKDIR /source
 
