@@ -1,5 +1,7 @@
 FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
 
+RUN apt-get update && apt-get install -y libgomp1
+
 WORKDIR /source
 
 COPY *.sln .
