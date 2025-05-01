@@ -152,7 +152,14 @@ public class PlayerResultsEntity
                 if (won) AWins++; else ALosses++;
                 break;
             default:
-                Debug.Assert(false, $"Unexpected ranking '{ranking}'");
+                if (ranking.StartsWith("A"))
+                {
+                    if (won) AWins++; else ALosses++;
+                }
+                else
+                {
+                    Debug.Assert(false, $"Unexpected ranking '{ranking}'");
+                }
                 break;
         }
     }
