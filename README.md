@@ -35,3 +35,12 @@ dotnet ef migrations add InitialCreate
 dotnet ef migrations remove
 dotnet ef database drop -f
 ```
+
+## Sync Progress
+
+```sql
+SELECT "Competition", "Year", "CategoryName", "SyncCompleted", COUNT(0)
+FROM "Clubs"
+GROUP BY "Competition", "Year", "CategoryName", "SyncCompleted"
+ORDER BY "Competition", "Year", "CategoryName", "SyncCompleted"
+```
