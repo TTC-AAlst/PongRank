@@ -11,6 +11,7 @@ internal class TtcDbContext : DbContext, ITtcDbContext
     public DbSet<ClubEntity> Clubs { get; set; }
     public DbSet<MatchEntity> Matches { get; set; }
     public DbSet<PlayerResultsEntity> PlayerResults { get; set; }
+    public DbSet<TournamentEntity> Tournaments { get; set; }
 
     public TtcDbContext(DbContextOptions<TtcDbContext> options) : base(options)
     {

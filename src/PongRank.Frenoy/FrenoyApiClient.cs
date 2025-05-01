@@ -65,8 +65,96 @@ public class FrenoyApiClient
         List<ClubEntity> clubs = await SyncClubs();
         await SyncPlayers(clubs);
         await SyncMatches(clubs);
+        await SyncTournaments();
+    }
 
-        // await SyncTournaments();
+    private async Task SyncTournaments()
+    {
+        var tournaments = await _db.Tournaments
+            .Where(x => x.Competition == _settings.Competition && x.Year == _settings.Year)
+            .ToListAsync();
+
+        if (tournaments.Count == 0)
+        {
+            var tournamentsResponse = await _frenoy.GetTournamentsAsync(new GetTournamentsRequest(new GetTournaments()
+            {
+                Season = _settings.FrenoySeason.ToString(),
+            }));
+
+            _logger.Information($"Tournaments to be synced: #{tournamentsResponse.GetTournamentsResponse.TournamentCount}");
+            foreach (var tournament in tournamentsResponse.GetTournamentsResponse.TournamentEntries)
+            {
+                var tournamentEntity = new TournamentEntity()
+                {
+                    Competition = _settings.Competition,
+                    Year = _settings.Year,
+                    Name = tournament.Name,
+                    Date = new DateTime(tournament.DateFrom.Year, tournament.DateFrom.Month, tournament.DateFrom.Day,0, 0, 0, DateTimeKind.Utc),
+                    UniqueIndex = tournament.UniqueIndex,
+                };
+                await _db.Tournaments.AddAsync(tournamentEntity);
+                tournaments.Add(tournamentEntity);
+            }
+            await _db.SaveChangesAsync();
+            _logger.Information("Tournaments added");
+        }
+
+        var tournamentsToBeSynced = tournaments
+            .Where(x => !x.SyncCompleted)
+            .Where(x => x.Date.AddDays(7) < DateTime.Now)
+            .ToArray();
+
+        _logger.Information($"Syncing match details for #{tournamentsToBeSynced.Length} tournaments");
+        foreach (var tournamentEntity in tournamentsToBeSynced)
+        {
+            var tournamentDetails = await _frenoy.GetTournamentsAsync(new GetTournamentsRequest(new GetTournaments()
+            {
+                Season = _settings.FrenoySeason.ToString(),
+                TournamentUniqueIndex = tournamentEntity.UniqueIndex,
+                WithResults = true,
+                WithResultsSpecified = true,
+            }));
+
+            Debug.Assert(tournamentDetails.GetTournamentsResponse.TournamentEntries.Length == 1);
+            var matches = tournamentDetails.GetTournamentsResponse.TournamentEntries[0].SerieEntries
+                .Where(x => x is { ResultEntries: not null })
+                .SelectMany(x => x.ResultEntries)
+                .ToArray();
+
+            _logger.Information($"Syncing tournament {tournamentEntity.Name} (#{matches.Length} matches)");
+            foreach (var match in matches)
+            {
+                if (match.IsHomeForfeited || match.IsAwayForfeited)
+                    continue;
+
+                if (match.HomePlayer is not { Length: 1 } || match.AwayPlayer is not { Length: 1 })
+                    continue;
+
+                var matchEntity = new MatchEntity()
+                {
+                    Competition = _settings.Competition,
+                    Year = _settings.Year,
+                    Date = tournamentEntity.Date,
+                    Home = new MatchEntityPlayer()
+                    {
+                        PlayerUniqueIndex = int.Parse(match.HomePlayer[0].UniqueIndex),
+                        SetCount = int.Parse(match.HomeSetCount)
+                    },
+                    Away = new MatchEntityPlayer()
+                    {
+                        PlayerUniqueIndex = int.Parse(match.AwayPlayer[0].UniqueIndex),
+                        SetCount = int.Parse(match.AwaySetCount)
+                    },
+                    TournamentUniqueIndex = tournamentEntity.UniqueIndex,
+                };
+
+                tournamentEntity.TotalMatches++;
+                await _db.Matches.AddAsync(matchEntity);
+            }
+
+            tournamentEntity.SyncCompleted = true;
+            await _db.SaveChangesAsync();
+        }
     }
 
     private async Task SyncMatches(List<ClubEntity> clubs)

@@ -21,6 +21,8 @@ public class MatchEntity
     [MaxLength(20)]
     public string MatchId { get; set; } = "";
     public int MatchUniqueId { get; set; }
+    [StringLength(10)]
+    public string TournamentUniqueIndex { get; set; } = "";
 
     public MatchEntityPlayer Home { get; set; } = new();
     public MatchEntityPlayer Away { get; set; } = new();

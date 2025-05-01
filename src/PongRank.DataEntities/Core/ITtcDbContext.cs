@@ -9,6 +9,7 @@ public interface ITtcDbContext
     DbSet<ClubEntity> Clubs { get; set; }
     DbSet<MatchEntity> Matches { get; set; }
     DbSet<PlayerResultsEntity> PlayerResults { get; set; }
+    DbSet<TournamentEntity> Tournaments { get; set; }
 
     Task<int> SaveChangesAsync(CancellationToken token = default);
 
