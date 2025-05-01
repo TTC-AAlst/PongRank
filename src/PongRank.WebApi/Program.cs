@@ -49,14 +49,15 @@ try
     if (app.Environment.IsDevelopment())
     {
         Log.Information("Starting Development Server with Swagger");
-        app.UseSwagger();
-        app.UseSwaggerUI();
         app.UseDeveloperExceptionPage();
     }
     else
     {
         Log.Information("Starting Release Server");
     }
+
+    app.UseSwagger();
+    app.UseSwaggerUI();
 
     app.UseCors("CorsPolicy");
 
