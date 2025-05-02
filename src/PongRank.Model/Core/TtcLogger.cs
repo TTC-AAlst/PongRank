@@ -16,6 +16,11 @@ public class TtcLogger
         _logger.Information(log);
     }
 
+    public void Warning(string log)
+    {
+        _logger.Warning(log);
+    }
+
     public void Error(string log)
     {
         _logger.Error(log);

@@ -1,4 +1,5 @@
 ﻿using System.Diagnostics;
+using System.Text.Json;
 using FrenoyVttl;
 using Microsoft.EntityFrameworkCore;
 using PongRank.DataEntities;
@@ -220,7 +221,16 @@ public class FrenoyApiClient
         if (match.Score == null)
             return;
 
-        if (matchUniqueIds.Any(id => id == int.Parse(match.MatchUniqueId)))
+        if (match.MatchUniqueId == null && match.MatchDetails.IndividualMatchResults == null)
+            return;
+
+        if (!int.TryParse(match.MatchUniqueId, out int matchUniqueId))
+        {
+            _logger.Warning($"MatchUniqueId was empty for {JsonSerializer.Serialize(match)}");
+            return;
+        }
+
+        if (matchUniqueIds.Any(id => id == matchUniqueId))
             return;
 
         foreach (var game in match.MatchDetails.IndividualMatchResults)
@@ -244,7 +254,7 @@ public class FrenoyApiClient
                 Date = date.UtcDateTime,
                 WeekName = match.WeekName,
                 MatchId = match.MatchId,
-                MatchUniqueId = int.Parse(match.MatchUniqueId),
+                MatchUniqueId = matchUniqueId,
                 Away = new MatchEntityPlayer()
                 {
                     PlayerUniqueIndex = int.Parse(game.AwayPlayerUniqueIndex.Single()),
