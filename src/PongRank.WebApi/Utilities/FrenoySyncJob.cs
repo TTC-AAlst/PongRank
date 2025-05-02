@@ -36,6 +36,7 @@ public class FrenoySyncJob : IHostedService, IDisposable
             {
                 foreach (int year in years)
                 {
+                    logger.Information($"FrenoySync for {competition} {year}");
                     var settings = new FrenoySettings(competition, year, []);
                     frenoy.Open(settings);
                     await frenoy.Sync();
