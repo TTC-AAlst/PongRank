@@ -43,12 +43,12 @@ public class FrenoySyncJob : IHostedService, IDisposable
                 }
             }
 
-            _timer?.Change(TimeSpan.FromHours(6), Timeout.InfiniteTimeSpan);
+            _timer?.Change(TimeSpan.FromHours(12), Timeout.InfiniteTimeSpan);
         }
         catch (Exception ex)
         {
             logger.Error(ex, "FrenoySyncJob failed {Message}", ex.Message);
-            _timer?.Change(TimeSpan.FromHours(6), Timeout.InfiniteTimeSpan);
+            _timer?.Change(TimeSpan.FromHours(12), Timeout.InfiniteTimeSpan);
         }
     }
 
