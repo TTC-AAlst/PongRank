@@ -1,34 +1,11 @@
 FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
-# Upgrade to 9.0?
 
-#RUN cmake --version
-#
-#RUN apt-get update && apt-get upgrade
-#RUN apt-get install git clang-3.9 libunwind8 curl libomp-dev -y 
-#
+# First error:
+# System.DllNotFoundException: Unable to load shared library 'lib_lightgbm' or one of its dependencies. In order to help diagnose loading problems, consider using a tool like strace. If you're using glibc, consider setting the LD_DEBUG environment variable:
+# libgomp.so.1: cannot open shared object file: No such file or directory
+# /app/lib_lightgbm.so: cannot open shared object file: No such file or directory
 
-# https://github.com/AMS21/docker-cmake/blob/main/Dockerfile
-#RUN apk update && apk upgrade --no-cache && \
-    #apk add --no-cache gcc g++ make git linux-headers openssl-dev && \
-    #git clone --depth 1 --branch "${VERSION}" https://github.com/Kitware/CMake.git && \
-    #cd CMake && \
-    #if [[ -d "../patches/${VERSION}" ]]; then git apply ../patches/${VERSION}/*.patch; fi && \
-    #CFLAGS="-w -O3 -flto -pipe -Wno-error=incompatible-pointer-types" \
-    #CXXFLAGS="-w -O3 -flto -pipe -Wno-error=incompatible-pointer-types" \
-    #./bootstrap --parallel=$(nproc) && make -j $(nproc) && \
-    #make install && \
-    #cd .. && \
-    #rm -rf CMake && rm -rf patches && \
-    #rm -rf /usr/local/share/cmake-*/Help && \
-    #apk del --purge --no-cache git linux-headers openssl-dev && \
-    #rm -rf /var/cache/apk/*
-#
-#RUN cmake --version
-
-#RUN git clone --recursive https://github.com/microsoft/LightGBM.git && \
-    #cd LightGBM && mkdir build && cd build && \
-    #cmake .. && make -j && make install
-
+# Second error:
 # CMake 3.28 or higher is required.  You are running version 3.25.1
 
 WORKDIR /source
@@ -58,6 +35,19 @@ RUN dotnet publish -c Release -o /app
 
 
 FROM mcr.microsoft.com/dotnet/aspnet:8.0 as runtime
+
+RUN apt-get update
+RUN apt-get install git clang-3.9 libunwind8 curl libomp-dev -y
+
+RUN apt-get install python3-pip -y
+RUN pip install cmake --upgrade --break-system-packages
+#RUN cmake --version
+
+RUN git clone --recursive https://github.com/microsoft/LightGBM.git
+RUN cd LightGBM && mkdir build && cd build && cmake .. && make -j && make install
+#RUN find / -name 'lib_lightgbm.so' 2>/dev/null
+
 WORKDIR /app
 COPY --from=build /app .
+
 ENTRYPOINT [ "dotnet", "/app/PongRank.WebApi.dll" ]
