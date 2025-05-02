@@ -18,10 +18,10 @@ public class MatchEntity
     [StringLength(5)]
     public string WeekName { get; set; } = "";
 
-    [MaxLength(20)]
+    [MaxLength(50)]
     public string MatchId { get; set; } = "";
     public int MatchUniqueId { get; set; }
-    [StringLength(10)]
+    [StringLength(50)]
     public string TournamentUniqueIndex { get; set; } = "";
 
     public MatchEntityPlayer Home { get; set; } = new();

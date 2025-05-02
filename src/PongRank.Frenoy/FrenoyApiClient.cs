@@ -183,7 +183,7 @@ public class FrenoyApiClient
                 WithDetailsSpecified = true,
             }));
 
-            _logger.Information($"Syncing #{matchesResponse.GetMatchesResponse.MatchCount} Matches for {club.Name} ({club.CategoryName})");
+            _logger.Information($"Syncing #{matchesResponse.GetMatchesResponse.MatchCount} Matches for {club.Name} ({club.CategoryName}, {club.UniqueIndex})");
             var matches = matchesResponse.GetMatchesResponse.TeamMatchesEntries ?? [];
             foreach (var match in matches)
             {
