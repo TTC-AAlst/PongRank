@@ -1,10 +1,35 @@
 FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
+# Upgrade to 9.0?
 
-RUN apt-get update
-RUN apt-get install git clang-3.9 cmake libunwind8 curl libomp-dev -y 
-RUN git clone --recursive https://github.com/microsoft/LightGBM.git && \
-    cd LightGBM && mkdir build && cd build && \
-    cmake .. && make -j && make install
+#RUN cmake --version
+#
+#RUN apt-get update && apt-get upgrade
+#RUN apt-get install git clang-3.9 libunwind8 curl libomp-dev -y 
+#
+
+# https://github.com/AMS21/docker-cmake/blob/main/Dockerfile
+#RUN apk update && apk upgrade --no-cache && \
+    #apk add --no-cache gcc g++ make git linux-headers openssl-dev && \
+    #git clone --depth 1 --branch "${VERSION}" https://github.com/Kitware/CMake.git && \
+    #cd CMake && \
+    #if [[ -d "../patches/${VERSION}" ]]; then git apply ../patches/${VERSION}/*.patch; fi && \
+    #CFLAGS="-w -O3 -flto -pipe -Wno-error=incompatible-pointer-types" \
+    #CXXFLAGS="-w -O3 -flto -pipe -Wno-error=incompatible-pointer-types" \
+    #./bootstrap --parallel=$(nproc) && make -j $(nproc) && \
+    #make install && \
+    #cd .. && \
+    #rm -rf CMake && rm -rf patches && \
+    #rm -rf /usr/local/share/cmake-*/Help && \
+    #apk del --purge --no-cache git linux-headers openssl-dev && \
+    #rm -rf /var/cache/apk/*
+#
+#RUN cmake --version
+
+#RUN git clone --recursive https://github.com/microsoft/LightGBM.git && \
+    #cd LightGBM && mkdir build && cd build && \
+    #cmake .. && make -j && make install
+
+# CMake 3.28 or higher is required.  You are running version 3.25.1
 
 WORKDIR /source
 
