@@ -31,7 +31,7 @@ public class FrenoySyncJob : IHostedService, IDisposable
             var frenoy = scope.ServiceProvider.GetRequiredService<FrenoyApiClient>();
 
             Competition[] competitions = [Competition.Vttl];
-            int[] years = [2023, 2024, 2022, 2021];
+            int[] years = [2024, 2022, 2021];
             foreach (var competition in competitions)
             {
                 foreach (int year in years)
