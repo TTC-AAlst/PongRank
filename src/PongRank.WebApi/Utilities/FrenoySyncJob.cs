@@ -47,7 +47,7 @@ public class FrenoySyncJob : IHostedService, IDisposable
         }
         catch (Exception ex)
         {
-            logger.Error(ex, "FrenoySyncJob failed {Message}", ex.Message);
+            logger.Error(ex, "FrenoySyncJob failed {ErrorMessage}", ex.Message);
             _timer?.Change(TimeSpan.FromHours(12), Timeout.InfiniteTimeSpan);
         }
     }

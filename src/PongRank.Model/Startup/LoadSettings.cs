@@ -1,11 +1,10 @@
 ﻿using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.DependencyInjection;
 
 namespace PongRank.Model.Startup;
 
 public static class LoadSettings
 {
-    public static (T, IConfigurationRoot) Configure<T>(IServiceCollection services) where T : class, new()
+    public static (T, IConfigurationRoot) GetConfiguration<T>() where T : class, new()
     {
         var settings = new T();
         var configuration = new ConfigurationBuilder()
@@ -16,8 +15,6 @@ public static class LoadSettings
         configuration
             .GetSection(typeof(T).Name)
             .Bind(settings);
-
-        services.AddSingleton(settings);
 
         return (settings, configuration);
     }

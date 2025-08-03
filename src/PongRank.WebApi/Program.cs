@@ -1,17 +1,19 @@
-using Serilog;
-using System.Text.Json.Serialization;
+using PongRank.DataAccess;
+using PongRank.FrenoyApi;
+using PongRank.ML;
 using PongRank.Model.Startup;
 using PongRank.WebApi.Utilities;
-using PongRank.DataAccess;
-using PongRank.ML;
-using PongRank.FrenoyApi;
-
-SetupLogger.Configure("webapi.txt");
+using Serilog;
+using Serilog.Context;
+using System.Text.Json.Serialization;
 
 try
 {
+    var (settings, configuration) = LoadSettings.GetConfiguration<WebApiSettings>();
+    SetupLogger.Configure("webapi.txt", settings.Loki);
+
     var builder = WebApplication.CreateBuilder(args);
-    var (settings, configuration) = LoadSettings.Configure<WebApiSettings>(builder.Services);
+    builder.Services.AddSingleton(settings);
     builder.Services.AddSingleton(settings.ML);
     builder.Services.AddCors(options =>
     {
@@ -58,6 +60,13 @@ try
     app.UseSwaggerUI();
 
     app.UseCors("CorsPolicy");
+
+    app.Use(async (context, next) =>
+    {
+        LogContext.PushProperty("UserName", context.User.Identity?.Name ?? "Anonymous");
+        LogContext.PushProperty("env", app.Environment.EnvironmentName);
+        await next();
+    });
 
     app.UseMiddleware<RequestLoggingFilter>();
 

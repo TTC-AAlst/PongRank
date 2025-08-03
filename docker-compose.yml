@@ -26,6 +26,7 @@ services:
       - "7300:8080"
     networks:
       - pongranknet
+      - monitoring_monitoring
     environment:
       - ASPNETCORE_ENVIRONMENT=Release
       - DB_PASSWORD=${DB_PASSWORD}
@@ -41,3 +42,5 @@ volumes:
 networks:
   pongranknet:
     driver: bridge
+  monitoring_monitoring:
+    external: true

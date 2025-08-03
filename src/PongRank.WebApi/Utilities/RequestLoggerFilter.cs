@@ -41,25 +41,25 @@ public class RequestLoggingFilter
 
         if (qs.Count > 0 && body.Length > 0)
         {
-            _logger.Information($"{request.Method} {request.Path} - Query: {queryParams}, Body: {body}");
+            _logger.Information("{Method} {Path} - Query: {Query}, Body: {Body}", request.Method, request.Path, queryParams, body);
         }
         else if (qs.Count > 0)
         {
-            _logger.Information($"{request.Method} {request.Path} - Query: {queryParams}");
+            _logger.Information("{Method} {Path} - Query: {Query}", request.Method, request.Path, queryParams);
         }
         else if (body.Length > 0)
         {
-            _logger.Information($"{request.Method} {request.Path} - Body: {body}");
+            _logger.Information("{Method} {Path} - Body: {Body}", request.Method, request.Path, body);
         }
         else
         {
-            _logger.Information($"{request.Method} {request.Path}");
+            _logger.Information("{Method} {Path}", request.Method, request.Path);
         }
 
 
         await _next(context);
 
 
-        _logger.Information($"{request.Method} {request.Path} - in {timer.Elapsed:g}");
+        _logger.Information("{Method} {Path} - in {Elapsed}", request.Method, request.Path, timer.Elapsed.ToString("g"));
     }
 }

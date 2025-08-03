@@ -226,7 +226,7 @@ public class FrenoyApiClient
 
         if (!int.TryParse(match.MatchUniqueId, out int matchUniqueId))
         {
-            _logger.Warning($"MatchUniqueId was empty for {JsonSerializer.Serialize(match)}");
+            _logger.Warning($"MatchUniqueId was empty for {match}", match);
             return;
         }
 

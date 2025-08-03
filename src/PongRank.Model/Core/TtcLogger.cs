@@ -16,9 +16,14 @@ public class TtcLogger
         _logger.Information(log);
     }
 
-    public void Warning(string log)
+    public void Information(string messageTemplate, params object[] propertyValues)
     {
-        _logger.Warning(log);
+        _logger.Information(messageTemplate, propertyValues);
+    }
+
+    public void Warning(string messageTemplate, object propertyValue)
+    {
+        _logger.Warning(messageTemplate, propertyValue);
     }
 
     public void Error(string log)

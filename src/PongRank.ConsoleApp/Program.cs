@@ -10,12 +10,13 @@ using Serilog;
 
 Console.WriteLine("PongRank Startup");
 
-SetupLogger.Configure("console.txt");
+SetupLogger.Configure("console.txt", "http://localhost:3100");
 
 var host = Host.CreateDefaultBuilder(args)
     .ConfigureServices((context, services) =>
     {
-        var (settings, configuration) = LoadSettings.Configure<ConsoleSettings>(services);
+        var (settings, configuration) = LoadSettings.GetConfiguration<ConsoleSettings>();
+        services.AddSingleton(settings);
         services.AddSingleton(settings.ML);
         GlobalBackendConfiguration.Configure(services, configuration);
         services.AddScoped<FrenoyApiClient>();
