@@ -27,6 +27,7 @@ try
     builder.Services.AddControllers().AddControllersAsServices().AddJsonOptions(options =>
     {
         options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
+        options.JsonSerializerOptions.WriteIndented = false;
     });
     builder.Services.AddEndpointsApiExplorer();
     AddSwagger.Configure(builder.Services);
@@ -45,7 +46,7 @@ try
     var app = builder.Build();
     if (app.Environment.IsDevelopment())
     {
-        Log.Information("Starting Development Server with Swagger");
+        Log.Information("Starting Development Server");
         app.UseDeveloperExceptionPage();
     }
     else
