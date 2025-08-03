@@ -16,7 +16,7 @@ services:
     volumes:
       - db-data:/var/lib/postgresql/data
 
-  webapi:
+  ml-webapi:
     build:
       context: ./
       dockerfile: ./src/PongRank.WebApi/Dockerfile
