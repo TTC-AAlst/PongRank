@@ -8,6 +8,7 @@ namespace PongRank.DataEntities;
 public class TournamentEntity
 {
     public int Id { get; set; }
+    [Column(TypeName = "character varying(10)")]
     public Competition Competition { get; set; }
     public int Year { get; set; }
     public DateTime Date { get; set; }
