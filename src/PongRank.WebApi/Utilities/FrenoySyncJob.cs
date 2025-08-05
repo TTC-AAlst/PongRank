@@ -47,7 +47,14 @@ public class FrenoySyncJob : IHostedService, IDisposable
         }
         catch (Exception ex)
         {
-            logger.Error(ex, "FrenoySyncJob failed {ErrorMessage}", ex.Message);
+            if (ex.Message.Contains("Quota exceeded"))
+            {
+                logger.Warning("FrenoySyncJob failed {ErrorMessage}", ex.Message);
+            }
+            else
+            {
+                logger.Error(ex, "FrenoySyncJob failed {ErrorMessage}", ex.Message);
+            }
             _timer?.Change(TimeSpan.FromHours(12), Timeout.InfiniteTimeSpan);
         }
     }
