@@ -2,8 +2,6 @@
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using PongRank.DataEntities.Core;
-using PongRank.Model.Core;
-using Serilog;
 
 namespace PongRank.DataAccess;
 
@@ -12,9 +10,6 @@ public static class GlobalBackendConfiguration
     public static void Configure(IServiceCollection services, IConfigurationRoot configuration)
     {
         ConfigureDbContext(services, configuration);
-
-        services.AddSerilog(Log.Logger);
-        services.AddSingleton<TtcLogger>();
         services.AddScoped<AggregateService>();
     }
 

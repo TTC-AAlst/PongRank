@@ -1,5 +1,4 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using PongRank.Model.Core;
 
 namespace PongRank.WebApi.Controllers;
 
@@ -7,9 +6,9 @@ namespace PongRank.WebApi.Controllers;
 public class ConfigController
 {
     #region Constructor
-    private readonly TtcLogger _logger;
+    private readonly ILogger<ConfigController> _logger;
 
-    public ConfigController(TtcLogger logger)
+    public ConfigController(ILogger<ConfigController> logger)
     {
         _logger = logger;
     }
@@ -19,13 +18,13 @@ public class ConfigController
     public string GetLogging()
     {
         string logDir = Path.Combine(Directory.GetCurrentDirectory(), "logs");
-        _logger.Information($"Looking for last log dir in: {logDir}");
+        _logger.LogInformation("Looking for last log dir in: {logDir}", logDir);
         string fileName = Directory
             .GetFiles(logDir, "*.txt")
             .OrderByDescending(x => x)
             .First();
 
-        _logger.Information($"Current log file: {fileName}");
+        _logger.LogInformation("Current log file: {fileName}", fileName);
         return File.ReadAllText(fileName);
     }
 }

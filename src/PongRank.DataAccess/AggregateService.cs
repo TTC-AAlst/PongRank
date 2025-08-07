@@ -1,8 +1,8 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 using PongRank.DataEntities;
 using PongRank.DataEntities.Core;
 using PongRank.Model;
-using PongRank.Model.Core;
 
 namespace PongRank.DataAccess;
 
@@ -13,9 +13,9 @@ public class AggregateService
 {
     private const int BatchSize = 100;
     private readonly ITtcDbContext _db;
-    private readonly TtcLogger _logger;
+    private readonly ILogger<AggregateService> _logger;
 
-    public AggregateService(ITtcDbContext db, TtcLogger logger)
+    public AggregateService(ITtcDbContext db, ILogger<AggregateService> logger)
     {
         _db = db;
         _logger = logger;
@@ -34,7 +34,7 @@ public class AggregateService
         int counter = 0;
 
         var playerLookup = players.ToDictionary(x => x.UniqueIndex, x => x);
-        _logger.Information($"Aggregating for #{players.Length} players");
+        _logger.LogInformation("Aggregating for #{PlayerCount} players", players.Length);
         foreach (var player in players)
         {
             var playerResults = new PlayerResultsEntity()

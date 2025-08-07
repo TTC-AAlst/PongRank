@@ -1,19 +1,21 @@
+using Itenium.Forge.Logging;
+using Itenium.Forge.Settings;
 using PongRank.DataAccess;
 using PongRank.FrenoyApi;
 using PongRank.ML;
-using PongRank.Model.Startup;
 using PongRank.WebApi.Utilities;
 using Serilog;
 using Serilog.Context;
 using System.Text.Json.Serialization;
 
+Log.Logger = LoggingExtensions.CreateLogger();
+
 try
 {
-    var (settings, configuration) = LoadSettings.GetConfiguration<WebApiSettings>();
-    SetupLogger.Configure("webapi.txt", settings.Loki);
-
     var builder = WebApplication.CreateBuilder(args);
-    builder.Services.AddSingleton(settings);
+    var settings = builder.AddForgeSettings<WebApiSettings>();
+    builder.AddForgeLogging();
+
     builder.Services.AddSingleton(settings.ML);
     builder.Services.AddCors(options =>
     {
@@ -33,7 +35,7 @@ try
     });
     builder.Services.AddEndpointsApiExplorer();
     AddSwagger.Configure(builder.Services);
-    GlobalBackendConfiguration.Configure(builder.Services, configuration);
+    GlobalBackendConfiguration.Configure(builder.Services, builder.Configuration);
     builder.Services.AddScoped<PredictionService>();
     builder.Services.AddScoped<FrenoyApiClient>();
     builder.Services.AddScoped<TrainingService>();
@@ -42,19 +44,8 @@ try
         builder.Services.AddHostedService<FrenoySyncJob>();
     }
 
-    builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
-    builder.Services.AddProblemDetails();
-
     var app = builder.Build();
-    if (app.Environment.IsDevelopment())
-    {
-        Log.Information("Starting Development Server");
-        app.UseDeveloperExceptionPage();
-    }
-    else
-    {
-        Log.Information("Starting Release Server");
-    }
+    app.UseForgeLogging();
 
     app.UseSwagger();
     app.UseSwaggerUI();
@@ -64,14 +55,10 @@ try
     app.Use(async (context, next) =>
     {
         LogContext.PushProperty("UserName", context.User.Identity?.Name ?? "Anonymous");
-        LogContext.PushProperty("env", app.Environment.EnvironmentName);
         await next();
     });
 
-    app.UseMiddleware<RequestLoggingFilter>();
-
     app.MapControllers();
-    app.UseExceptionHandler();
     app.Lifetime.ApplicationStopped.Register(Log.CloseAndFlush);
 
     GlobalBackendConfiguration.MigrateDb(app.Services);

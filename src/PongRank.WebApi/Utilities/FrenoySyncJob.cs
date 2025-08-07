@@ -1,6 +1,5 @@
 ﻿using PongRank.FrenoyApi;
 using PongRank.Model;
-using PongRank.Model.Core;
 
 namespace PongRank.WebApi.Utilities;
 
@@ -23,10 +22,10 @@ public class FrenoySyncJob : IHostedService, IDisposable
     private async Task SyncMatches()
     {
         using var scope = _services.CreateScope();
-        var logger = scope.ServiceProvider.GetRequiredService<TtcLogger>();
+        var logger = scope.ServiceProvider.GetRequiredService<ILogger<FrenoySyncJob>>();
         try
         {
-            logger.Information($"SyncJob Started at {DateTime.Now:dd/MM/yyyy}");
+            logger.LogInformation("SyncJob Started at {SyncStart}", DateTime.Now.ToString("dd/MM/yyyy"));
 
             var frenoy = scope.ServiceProvider.GetRequiredService<FrenoyApiClient>();
 
@@ -36,7 +35,7 @@ public class FrenoySyncJob : IHostedService, IDisposable
             {
                 foreach (int year in years)
                 {
-                    logger.Information($"FrenoySync for {competition} {year}");
+                    logger.LogInformation("FrenoySync for {competition} {year}", competition, year);
                     var settings = new FrenoySettings(competition, year, []);
                     frenoy.Open(settings);
                     await frenoy.Sync();
@@ -49,11 +48,11 @@ public class FrenoySyncJob : IHostedService, IDisposable
         {
             if (ex.Message.Contains("Quota exceeded"))
             {
-                logger.Warning("FrenoySyncJob failed {ErrorMessage}", ex.Message);
+                logger.LogWarning("FrenoySyncJob failed {ErrorMessage}", ex.Message);
             }
             else
             {
-                logger.Error(ex, "FrenoySyncJob failed {ErrorMessage}", ex.Message);
+                logger.LogError(ex, "FrenoySyncJob failed {ErrorMessage}", ex.Message);
             }
             _timer?.Change(TimeSpan.FromHours(12), Timeout.InfiniteTimeSpan);
         }
@@ -68,5 +67,6 @@ public class FrenoySyncJob : IHostedService, IDisposable
     public void Dispose()
     {
         _timer?.Dispose();
+        GC.SuppressFinalize(this);
     }
 }

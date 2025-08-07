@@ -1,11 +1,10 @@
-﻿using System.Diagnostics;
-using System.Text.Json;
-using FrenoyVttl;
+﻿using FrenoyVttl;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 using PongRank.DataEntities;
 using PongRank.DataEntities.Core;
 using PongRank.Model;
-using PongRank.Model.Core;
+using System.Diagnostics;
 
 namespace PongRank.FrenoyApi;
 
@@ -19,11 +18,11 @@ public class FrenoyApiClient
     private FrenoySettings _settings;
     private TabTAPI_PortTypeClient _frenoy;
     private readonly ITtcDbContext _db;
-    private readonly TtcLogger _logger;
+    private readonly ILogger<FrenoyApiClient> _logger;
     #endregion
 
     #region Constructor
-    public FrenoyApiClient(ITtcDbContext ttcDbContext, TtcLogger logger)
+    public FrenoyApiClient(ITtcDbContext ttcDbContext, ILogger<FrenoyApiClient> logger)
     {
         _db = ttcDbContext;
         _logger = logger;
@@ -82,7 +81,7 @@ public class FrenoyApiClient
                 Season = _settings.FrenoySeason.ToString(),
             }));
 
-            _logger.Information($"Tournaments to be synced: #{tournamentsResponse.GetTournamentsResponse.TournamentCount}");
+            _logger.LogInformation("Tournaments to be synced: #{TournamentCount}", tournamentsResponse.GetTournamentsResponse.TournamentCount);
             foreach (var tournament in tournamentsResponse.GetTournamentsResponse.TournamentEntries)
             {
                 var tournamentEntity = new TournamentEntity()
@@ -97,7 +96,7 @@ public class FrenoyApiClient
                 tournaments.Add(tournamentEntity);
             }
             await _db.SaveChangesAsync();
-            _logger.Information("Tournaments added");
+            _logger.LogInformation("Tournaments added");
         }
 
         var tournamentsToBeSynced = tournaments
@@ -105,7 +104,7 @@ public class FrenoyApiClient
             .Where(x => x.Date.AddDays(7) < DateTime.Now)
             .ToArray();
 
-        _logger.Information($"Syncing match details for #{tournamentsToBeSynced.Length} tournaments");
+        _logger.LogInformation("Syncing match details for #{TournamentCount} tournaments", tournamentsToBeSynced.Length);
         foreach (var tournamentEntity in tournamentsToBeSynced)
         {
             var tournamentDetails = await _frenoy.GetTournamentsAsync(new GetTournamentsRequest(new GetTournaments()
@@ -122,7 +121,7 @@ public class FrenoyApiClient
                 .SelectMany(x => x.ResultEntries)
                 .ToArray();
 
-            _logger.Information($"Syncing tournament {tournamentEntity.Name} (#{matches.Length} matches)");
+            _logger.LogInformation("Syncing tournament {TournamentName} (#{MatchesCount} matches)", tournamentEntity.Name, matches.Length);
             foreach (var match in matches)
             {
                 if (match.IsHomeForfeited || match.IsAwayForfeited)
@@ -183,7 +182,7 @@ public class FrenoyApiClient
                 WithDetailsSpecified = true,
             }));
 
-            _logger.Information($"Syncing #{matchesResponse.GetMatchesResponse.MatchCount} Matches for {club.Name} ({club.CategoryName}, {club.UniqueIndex})");
+            _logger.LogInformation("Syncing #{MatchesCount} Matches for {ClubName} ({ClubCategoryName}, {ClubUniqueIndex})", matchesResponse.GetMatchesResponse.MatchCount, club.Name, club.CategoryName, club.UniqueIndex);
             var matches = matchesResponse.GetMatchesResponse.TeamMatchesEntries ?? [];
             foreach (var match in matches)
             {
@@ -201,11 +200,11 @@ public class FrenoyApiClient
             await _db.SaveChangesAsync();
             if (club.SyncCompleted)
             {
-                _logger.Information("Synced ALL Matches for Club");
+                _logger.LogInformation("Synced ALL Matches for Club");
             }
             else
             {
-                _logger.Information($"Synced Matches for Club: #{futureMatches.Length} remaining matches");
+                _logger.LogInformation("Synced Matches for Club: #{MatchesCount} remaining matches", futureMatches.Length);
             }
         }
     }
@@ -226,7 +225,7 @@ public class FrenoyApiClient
 
         if (!int.TryParse(match.MatchUniqueId, out int matchUniqueId))
         {
-            _logger.Warning($"MatchUniqueId was empty for {match}", match);
+            _logger.LogWarning("MatchUniqueId was empty for {match}", match);
             return;
         }
 
@@ -285,7 +284,7 @@ public class FrenoyApiClient
             Season = _settings.FrenoySeason.ToString()
         }));
 
-        _logger.Information($"Syncing Clubs (#{clubs.GetClubsResponse.ClubCount})");
+        _logger.LogInformation("Syncing Clubs (#{ClubCount})", clubs.GetClubsResponse.ClubCount);
         foreach (var club in clubs.GetClubsResponse.ClubEntries)
         {
             var clubEntity = new ClubEntity()
@@ -302,7 +301,7 @@ public class FrenoyApiClient
         }
 
         await _db.SaveChangesAsync();
-        _logger.Information("Synced Clubs");
+        _logger.LogInformation("Synced Clubs");
 
         return clubEntities;
     }
@@ -322,7 +321,7 @@ public class FrenoyApiClient
             NameSearch = "",
         }));
 
-        _logger.Information($"Syncing Players (#{members.GetMembersResponse.MemberCount})");
+        _logger.LogInformation("Syncing Players (#{PlayerCount})", members.GetMembersResponse.MemberCount);
         foreach (var member in members.GetMembersResponse.MemberEntries)
         {
             var club = clubs.FirstOrDefault(x => x.UniqueIndex == member.Club);
@@ -345,6 +344,6 @@ public class FrenoyApiClient
             await _db.Players.AddAsync(player);
         }
         await _db.SaveChangesAsync();
-        _logger.Information("Synced Players");
+        _logger.LogInformation("Synced Players");
     }
 }
