@@ -30,6 +30,8 @@ public class FrenoySyncController
     /// <summary>
     /// Aggregate the synced match results from Frenoy for ML training
     /// </summary>
+    /// <param name="competition"></param>
+    /// <param name="year">The actual year (not Frenoy season)</param>
     [HttpPost(nameof(Aggregate))]
     public async Task Aggregate(Competition competition, int year)
     {

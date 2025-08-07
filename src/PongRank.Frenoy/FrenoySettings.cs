@@ -8,6 +8,9 @@ public class FrenoySettings
 
     public Competition Competition { get; }
 
+    /// <summary>
+    /// The actual year (not Frenoy season)
+    /// </summary>
     public int Year
     {
         get => _year;
@@ -21,7 +24,12 @@ public class FrenoySettings
         }
     }
 
+    /// <summary>
+    /// Sporta: Oost-Vlaanderen, Antwerpen, Vl.-Brabant &amp; BHG  
+    /// Vttl: Oost-Vlaanderen, West-Vlaanderen, Antwerpen, Limburg, ...
+    /// </summary>
     public string[] CategoryNames { get; } = [];
+
     public int FrenoySeason => Year - 2000 + 1;
 
     public FrenoySettings(Competition competition, int year, string[] categoryNames)

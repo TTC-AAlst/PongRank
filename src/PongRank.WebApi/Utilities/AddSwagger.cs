@@ -8,6 +8,12 @@ public static class AddSwagger
         {
             var filePath = Path.Combine(AppContext.BaseDirectory, "PongRank.WebApi.xml");
             c.IncludeXmlComments(filePath);
+
+            var mlFilePath = Path.Combine(AppContext.BaseDirectory, "PongRank.ML.xml");
+            c.IncludeXmlComments(mlFilePath);
+
+            var apiFilePath = Path.Combine(AppContext.BaseDirectory, "PongRank.FrenoyApi.xml");
+            c.IncludeXmlComments(apiFilePath);
         });
     }
 }
