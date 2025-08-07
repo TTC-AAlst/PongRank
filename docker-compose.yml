@@ -7,7 +7,7 @@ services:
     restart: always
     environment:
       POSTGRES_USER: ponguser
-      POSTGRES_PASSWORD: ${DB_PASSWORD}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-my-secret-pw}
       POSTGRES_DB: PongRank
     ports:
       - "7301:5432"
@@ -29,7 +29,7 @@ services:
       - monitoring_monitoring
     environment:
       - ASPNETCORE_ENVIRONMENT=Release
-      - DB_PASSWORD=${DB_PASSWORD}
+      - DB_PASSWORD=${DB_PASSWORD:-my-secret-pw}
     volumes:
       - /volume1/Projects/PongRank-Logs:/app/logs
       - /volume1/Projects/PongRank-Models:/ml-models
