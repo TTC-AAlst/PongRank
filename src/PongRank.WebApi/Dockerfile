@@ -1,4 +1,4 @@
-FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
+FROM mcr.microsoft.com/dotnet/sdk:9.0 AS build
 
 # First error:
 # System.DllNotFoundException: Unable to load shared library 'lib_lightgbm' or one of its dependencies. In order to help diagnose loading problems, consider using a tool like strace. If you're using glibc, consider setting the LD_DEBUG environment variable:
@@ -45,7 +45,7 @@ RUN dotnet publish -c Release -o /app
 
 
 
-FROM mcr.microsoft.com/dotnet/aspnet:8.0 as runtime
+FROM mcr.microsoft.com/dotnet/aspnet:9.0 as runtime
 
 
 WORKDIR /app
