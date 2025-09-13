@@ -14,9 +14,12 @@ try
 {
     var builder = WebApplication.CreateBuilder(args);
     var settings = builder.AddForgeSettings<WebApiSettings>();
+    builder.Services.AddSingleton(settings.ML);
+    builder.Services.AddSingleton(settings.SyncJob);
+    builder.Services.AddSingleton(settings.CurrentYear);
+
     builder.AddForgeLogging();
 
-    builder.Services.AddSingleton(settings.ML);
     builder.Services.AddCors(options =>
     {
         options.AddPolicy("CorsPolicy", corsBuilder =>
@@ -42,6 +45,7 @@ try
     if (settings.StartSyncJob)
     {
         builder.Services.AddHostedService<FrenoySyncJob>();
+        builder.Services.AddHostedService<CurrentSeasonSyncJob>();
     }
 
     var app = builder.Build();

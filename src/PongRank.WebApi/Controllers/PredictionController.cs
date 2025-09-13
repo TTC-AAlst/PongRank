@@ -15,14 +15,15 @@ public class PredictionController
     }
 
     /// <summary>
-    /// Predict new rankings for the entire club
+    /// Use the models from Step 3 to
+    /// predict new rankings for the entire club
     /// </summary>
     [HttpGet]
-    public Task<IEnumerable<PredictionResult>> Get(PredictionRequest request)
+    public async Task<IEnumerable<PredictionResult>> Get(PredictionRequest request)
     {
-        var result = _service.Predict(request);
+        var result = await _service.Predict(request);
 
-        //var toCompare = result.Result
+        //var toCompare = result
         //    .OrderBy(x => x.Name)
         //    .ToArray();
 

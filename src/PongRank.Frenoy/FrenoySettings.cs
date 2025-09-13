@@ -6,7 +6,7 @@ public class FrenoySettings
 {
     private int _year;
 
-    public Competition Competition { get; }
+    public Competition Competition { get; set; }
 
     /// <summary>
     /// The actual year (not Frenoy season)
@@ -28,8 +28,11 @@ public class FrenoySettings
     /// Sporta: Oost-Vlaanderen, Antwerpen, Vl.-Brabant &amp; BHG  
     /// Vttl: Oost-Vlaanderen, West-Vlaanderen, Antwerpen, Limburg, ...
     /// </summary>
-    public string[] CategoryNames { get; } = [];
+    public string[] CategoryNames { get; set; } = [];
 
+    /// <summary>
+    /// Calculated property (do not set in Swagger)
+    /// </summary>
     public int FrenoySeason => Year - 2000 + 1;
 
     public FrenoySettings(Competition competition, int year, string[] categoryNames)

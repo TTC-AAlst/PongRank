@@ -8,6 +8,9 @@ using System.Diagnostics;
 
 namespace PongRank.FrenoyApi;
 
+/// <summary>
+/// Step 1: Sync Clubs, Players, Matches and Tournaments
+/// </summary>
 public class FrenoyApiClient
 {
     #region Fields
@@ -64,8 +67,24 @@ public class FrenoyApiClient
     {
         List<ClubEntity> clubs = await SyncClubs();
         await SyncPlayers(clubs);
-        await SyncMatches(clubs);
+        await SyncMatches(clubs, false);
         await SyncTournaments();
+    }
+
+    public async Task StartSyncForNewSeason()
+    {
+        List<ClubEntity> clubs = await SyncClubs();
+        await SyncPlayers(clubs);
+    }
+
+    public async Task SyncMatches(string clubUniqueIndex)
+    {
+        var club = await _db.Clubs
+            .Where(x => x.Competition == _settings.Competition)
+            .Where(x => x.Year == _settings.Year)
+            .SingleAsync(x => x.UniqueIndex == clubUniqueIndex);
+
+        await SyncMatches([club], true);
     }
 
     private async Task SyncTournaments()
@@ -157,7 +176,7 @@ public class FrenoyApiClient
         }
     }
 
-    private async Task SyncMatches(List<ClubEntity> clubs)
+    private async Task SyncMatches(List<ClubEntity> clubs, bool allowUnvalidated)
     {
         var toSyncClubs = clubs.Where(x => !x.SyncCompleted).ToArray();
         if (_settings.CategoryNames.Length > 0)
@@ -186,7 +205,7 @@ public class FrenoyApiClient
             var matches = matchesResponse.GetMatchesResponse.TeamMatchesEntries ?? [];
             foreach (var match in matches)
             {
-                await SyncMatch(match, matchUniqueIds);
+                await SyncMatch(match, matchUniqueIds, allowUnvalidated);
             }
 
             var futureMatches = matches
@@ -209,9 +228,9 @@ public class FrenoyApiClient
         }
     }
 
-    private async Task SyncMatch(TeamMatchEntryType match, List<int> matchUniqueIds)
+    private async Task SyncMatch(TeamMatchEntryType match, List<int> matchUniqueIds, bool allowUnvalidated)
     {
-        if (!match.IsValidated)
+        if (!match.IsValidated && !allowUnvalidated)
             return;
 
         if (match.IsAwayForfeited || match.IsHomeForfeited)

@@ -1,8 +1,10 @@
 ﻿using PongRank.FrenoyApi;
-using PongRank.Model;
 
 namespace PongRank.WebApi.Utilities;
 
+/// <summary>
+/// Syncing based on the <see cref="SyncJobSettings"/>. This is for building historical data.
+/// </summary>
 public class FrenoySyncJob : IHostedService, IDisposable
 {
     private readonly IServiceProvider _services;
@@ -23,20 +25,18 @@ public class FrenoySyncJob : IHostedService, IDisposable
     {
         using var scope = _services.CreateScope();
         var logger = scope.ServiceProvider.GetRequiredService<ILogger<FrenoySyncJob>>();
+        var jobSettings = scope.ServiceProvider.GetRequiredService<SyncJobSettings>();
         try
         {
-            logger.LogInformation("SyncJob Started at {SyncStart}", DateTime.Now.ToString("dd/MM/yyyy"));
+            logger.LogInformation("SyncJob Started at {SyncStart}", DateTime.Now.ToString("dd/MM/yyyy HH:mm"));
 
             var frenoy = scope.ServiceProvider.GetRequiredService<FrenoyApiClient>();
-
-            Competition[] competitions = [Competition.Vttl];
-            int[] years = [2024, 2022, 2021];
-            foreach (var competition in competitions)
+            foreach (var competition in jobSettings.SynCompetitions)
             {
-                foreach (int year in years)
+                foreach (int year in jobSettings.SyncYears)
                 {
                     logger.LogInformation("FrenoySync for {competition} {year}", competition, year);
-                    var settings = new FrenoySettings(competition, year, []);
+                    var settings = new FrenoySettings(competition, year, jobSettings.SyncCategoryNames);
                     frenoy.Open(settings);
                     await frenoy.Sync();
                 }
