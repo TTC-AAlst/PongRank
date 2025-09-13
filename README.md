@@ -1,6 +1,17 @@
 PongRank
 ========
 
+## Flow
+
+```mermaid
+graph LR
+  A["FrenoyApiClient.Sync
+  Matches and Tournaments"] --> B["AggregateService.CalculateAndSave
+  Creates PlayerResultsEntities"]
+  B --> C[TrainingService.Train<br />Creates the ML models]
+```
+
+
 
 ## Deploy
 
