@@ -1,4 +1,4 @@
-﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using PongRank.DataEntities.Core;
@@ -22,6 +22,7 @@ public static class GlobalBackendConfiguration
 
     internal static void ConfigureDbContextBuilder(DbContextOptionsBuilder builder, string? connectionString = null)
     {
+        Serilog.Log.Logger.Information($"ConfigureDbContextBuilder with {connectionString}");
         if (connectionString == null)
         {
             var configuration = new ConfigurationBuilder()
@@ -30,6 +31,7 @@ public static class GlobalBackendConfiguration
                 .AddJsonFile($"appsettings.{Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") ?? "Development"}.json", optional: true)
                 .Build();
             connectionString = configuration.GetConnectionString("Ttc") ?? "";
+            Serilog.Log.Logger.Information($"ConfigureDbContextBuilder setting from {Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT")} to {connectionString}");
         }
 
         string? dbPassword = Environment.GetEnvironmentVariable("DB_PASSWORD");
@@ -38,6 +40,7 @@ public static class GlobalBackendConfiguration
             connectionString = connectionString.Replace("{DB_PASSWORD}", dbPassword);
         }
 
+        Serilog.Log.Logger.Information($"ConfigureDbContextBuilder final {connectionString}");
         builder.UseNpgsql(connectionString);
     }
 
