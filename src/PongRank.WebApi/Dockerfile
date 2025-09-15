@@ -25,6 +25,7 @@ ARG Nuget_CustomFeedUserName
 ARG Nuget_CustomFeedPassword
 
 COPY *.sln .
+COPY nuget.config .
 COPY src/PongRank.Frenoy/*.csproj ./src/PongRank.Frenoy/
 COPY src/PongRank.DataAccess/*.csproj ./src/PongRank.DataAccess/
 COPY src/PongRank.DataEntities/*.csproj ./src/PongRank.DataEntities/
