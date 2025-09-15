@@ -20,6 +20,9 @@ services:
     build:
       context: ./
       dockerfile: ./src/PongRank.WebApi/Dockerfile
+      args:
+        - Nuget_CustomFeedUserName=${Nuget_CustomFeedUserName}
+        - Nuget_CustomFeedPassword=${Nuget_CustomFeedPassword}
     container_name: pongrank-backend
     restart: always
     ports:
