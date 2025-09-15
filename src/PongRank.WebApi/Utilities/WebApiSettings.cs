@@ -1,4 +1,4 @@
-﻿using Itenium.Forge.Core;
+using Itenium.Forge.Core;
 using Itenium.Forge.Settings;
 using PongRank.ML.Models;
 
@@ -13,7 +13,6 @@ public class WebApiSettings : IForgeSettings
     public SyncJobSettings SyncJob { get; set; } = new();
     public MLSettings ML { get; set; } = new();
     public CurrentYearSettings CurrentYear { get; set; } = new();
-    public string Loki { get; set; } = "";
 }
 
 /// <summary>

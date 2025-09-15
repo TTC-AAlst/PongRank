@@ -1,14 +1,15 @@
+using Itenium.Forge.Controllers;
 using Itenium.Forge.Logging;
 using Itenium.Forge.Settings;
+using Itenium.Forge.Swagger;
 using PongRank.DataAccess;
 using PongRank.FrenoyApi;
 using PongRank.ML;
 using PongRank.WebApi.Utilities;
 using Serilog;
 using Serilog.Context;
-using System.Text.Json.Serialization;
 
-Log.Logger = LoggingExtensions.CreateLogger();
+Log.Logger = LoggingExtensions.CreateBootstrapLogger();
 
 try
 {
@@ -19,25 +20,10 @@ try
     builder.Services.AddSingleton(settings.CurrentYear);
 
     builder.AddForgeLogging();
+    builder.AddForgeControllers();
 
-    builder.Services.AddCors(options =>
-    {
-        options.AddPolicy("CorsPolicy", corsBuilder =>
-        {
-            corsBuilder
-                .WithOrigins(settings.Origins)
-                .AllowAnyHeader()
-                .AllowAnyMethod();
-        });
-    });
-    
-    builder.Services.AddControllers().AddControllersAsServices().AddJsonOptions(options =>
-    {
-        options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
-        options.JsonSerializerOptions.WriteIndented = false;
-    });
-    builder.Services.AddEndpointsApiExplorer();
-    AddSwagger.Configure(builder.Services);
+    builder.AddForgeSwagger(typeof(TrainingService), typeof(FrenoySettings));
+
     GlobalBackendConfiguration.Configure(builder.Services, builder.Configuration);
     builder.Services.AddScoped<PredictionService>();
     builder.Services.AddScoped<FrenoyApiClient>();
@@ -51,10 +37,7 @@ try
     var app = builder.Build();
     app.UseForgeLogging();
 
-    app.UseSwagger();
-    app.UseSwaggerUI();
-
-    app.UseCors("CorsPolicy");
+    app.UseForgeSwagger();
 
     app.Use(async (context, next) =>
     {
@@ -62,7 +45,7 @@ try
         await next();
     });
 
-    app.MapControllers();
+    app.UseForgeControllers();
     app.Lifetime.ApplicationStopped.Register(Log.CloseAndFlush);
 
     GlobalBackendConfiguration.MigrateDb(app.Services);
