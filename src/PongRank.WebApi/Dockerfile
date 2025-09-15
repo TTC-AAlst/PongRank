@@ -21,6 +21,9 @@ RUN cd LightGBM && mkdir build && cd build && cmake .. && make -j && make instal
 
 WORKDIR /source
 
+ARG Nuget_CustomFeedUserName
+ARG Nuget_CustomFeedPassword
+
 COPY *.sln .
 COPY src/PongRank.Frenoy/*.csproj ./src/PongRank.Frenoy/
 COPY src/PongRank.DataAccess/*.csproj ./src/PongRank.DataAccess/
