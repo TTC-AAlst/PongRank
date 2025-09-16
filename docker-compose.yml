@@ -26,7 +26,7 @@ services:
     container_name: pongrank-backend
     restart: always
     ports:
-      - "7300:8080"
+      - "7300:5000"
     networks:
       - pongranknet
       - monitoring_monitoring
