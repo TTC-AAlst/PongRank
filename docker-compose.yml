@@ -31,7 +31,7 @@ services:
       - pongranknet
       - monitoring_monitoring
     environment:
-      - ASPNETCORE_ENVIRONMENT=Release
+      - DOTNET_ENVIRONMENT=Release
       - DB_PASSWORD=${DB_PASSWORD:-my-secret-pw}
     volumes:
       - /volume1/Projects/PongRank-Logs:/app/logs
