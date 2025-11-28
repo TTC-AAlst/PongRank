@@ -1,4 +1,4 @@
-﻿using PongRank.FrenoyApi;
+using PongRank.FrenoyApi;
 
 namespace PongRank.WebApi.Utilities;
 
@@ -28,10 +28,11 @@ public class FrenoySyncJob : IHostedService, IDisposable
         var jobSettings = scope.ServiceProvider.GetRequiredService<SyncJobSettings>();
         try
         {
-            logger.LogInformation("SyncJob Started at {SyncStart}", DateTime.Now.ToString("dd/MM/yyyy HH:mm"));
+            logger.LogInformation("SyncJob Started at {SyncStart}", DateTime.Now.ToString("dd/MM/yyyy HH:mm:ss"));
+            logger.LogInformation("SyncJob with {@Settings}", jobSettings);
 
             var frenoy = scope.ServiceProvider.GetRequiredService<FrenoyApiClient>();
-            foreach (var competition in jobSettings.SynCompetitions)
+            foreach (var competition in jobSettings.SyncCompetitions)
             {
                 foreach (int year in jobSettings.SyncYears)
                 {
@@ -42,6 +43,7 @@ public class FrenoySyncJob : IHostedService, IDisposable
                 }
             }
 
+            logger.LogInformation("SyncJob Ended at {SyncStart}", DateTime.Now.ToString("dd/MM/yyyy HH:mm:ss"));
             _timer?.Change(TimeSpan.FromHours(12), Timeout.InfiniteTimeSpan);
         }
         catch (Exception ex)
