@@ -1,0 +1,60 @@
+<Project>
+
+  <PropertyGroup>
+    <ManagePackageVersionsCentrally>true</ManagePackageVersionsCentrally>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <!-- CoreWCF -->
+    <PackageVersion Include="CoreWCF.Http" Version="1.8.0" />
+    <PackageVersion Include="CoreWCF.Primitives" Version="1.8.0" />
+
+    <!-- Entity Framework Core -->
+    <PackageVersion Include="Microsoft.EntityFrameworkCore" Version="9.0.4" />
+    <PackageVersion Include="Microsoft.EntityFrameworkCore.Design" Version="9.0.4" />
+    <PackageVersion Include="Microsoft.EntityFrameworkCore.Relational" Version="9.0.4" />
+    <PackageVersion Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="9.0.4" />
+
+    <!-- Microsoft.Extensions -->
+    <PackageVersion Include="Microsoft.Extensions.Configuration" Version="9.0.4" />
+    <PackageVersion Include="Microsoft.Extensions.Configuration.Abstractions" Version="9.0.4" />
+    <PackageVersion Include="Microsoft.Extensions.Configuration.Binder" Version="9.0.4" />
+    <PackageVersion Include="Microsoft.Extensions.Configuration.FileExtensions" Version="9.0.4" />
+    <PackageVersion Include="Microsoft.Extensions.Configuration.Json" Version="9.0.4" />
+    <PackageVersion Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="9.0.4" />
+    <PackageVersion Include="Microsoft.Extensions.Hosting" Version="9.0.8" />
+
+    <!-- ASP.NET Core -->
+    <PackageVersion Include="Microsoft.AspNetCore.Http.Abstractions" Version="2.1.1" />
+
+    <!-- Machine Learning -->
+    <PackageVersion Include="Microsoft.ML" Version="4.0.2" />
+    <PackageVersion Include="Microsoft.ML.LightGbm" Version="4.0.2" />
+
+    <!-- Serilog -->
+    <PackageVersion Include="Serilog" Version="4.3.0" />
+    <PackageVersion Include="Serilog.Expressions" Version="5.0.0" />
+    <PackageVersion Include="Serilog.Extensions.Hosting" Version="9.0.0" />
+    <PackageVersion Include="Serilog.Settings.Configuration" Version="9.0.0" />
+    <PackageVersion Include="Serilog.Sinks.Console" Version="6.0.0" />
+    <PackageVersion Include="Serilog.Sinks.File" Version="7.0.0" />
+
+    <!-- System.ServiceModel -->
+    <PackageVersion Include="System.ServiceModel.Duplex" Version="6.0.0" />
+    <PackageVersion Include="System.ServiceModel.Federation" Version="6.0.0" />
+    <PackageVersion Include="System.ServiceModel.Http" Version="6.0.0" />
+    <PackageVersion Include="System.ServiceModel.NetTcp" Version="6.0.0" />
+    <PackageVersion Include="System.ServiceModel.Security" Version="6.0.0" />
+
+    <!-- Itenium.Forge -->
+    <PackageVersion Include="Itenium.Forge.Controllers" Version="0.3.13" />
+    <PackageVersion Include="Itenium.Forge.HealthChecks" Version="0.3.13" />
+    <PackageVersion Include="Itenium.Forge.Logging" Version="0.3.13" />
+    <PackageVersion Include="Itenium.Forge.Settings" Version="0.3.13" />
+    <PackageVersion Include="Itenium.Forge.Swagger" Version="0.3.13" />
+
+    <!-- Tools -->
+    <PackageVersion Include="Microsoft.VisualStudio.Azure.Containers.Tools.Targets" Version="1.21.0" />
+  </ItemGroup>
+
+</Project>

@@ -1,17 +1,8 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
-
-  <PropertyGroup>
-    <TargetFramework>net10.0</TargetFramework>
-    <ImplicitUsings>enable</ImplicitUsings>
-    <Nullable>enable</Nullable>
-    <NoWarn>CS1591</NoWarn>
-    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
-    <GenerateDocumentationFile>True</GenerateDocumentationFile>
-  </PropertyGroup>
+<Project Sdk="Microsoft.NET.Sdk">
 
   <ItemGroup>
-    <PackageReference Include="Microsoft.ML" Version="4.0.2" />
-    <PackageReference Include="Microsoft.ML.LightGbm" Version="4.0.2" />
+    <PackageReference Include="Microsoft.ML" />
+    <PackageReference Include="Microsoft.ML.LightGbm" />
   </ItemGroup>
 
   <ItemGroup>
