@@ -8,7 +8,6 @@ using PongRank.FrenoyApi;
 using PongRank.ML;
 using PongRank.WebApi.Utilities;
 using Serilog;
-using Serilog.Context;
 
 Log.Logger = LoggingExtensions.CreateBootstrapLogger();
 
@@ -41,12 +40,6 @@ try
     app.UseForgeHealthChecks();
 
     app.UseForgeSwagger();
-
-    app.Use(async (context, next) =>
-    {
-        LogContext.PushProperty("UserName", context.User.Identity?.Name ?? "Anonymous");
-        await next();
-    });
 
     app.UseForgeControllers();
     app.Lifetime.ApplicationStopped.Register(Log.CloseAndFlush);
