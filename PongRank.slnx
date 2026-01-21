@@ -1,0 +1,21 @@
+<Solution>
+  <Folder Name="/Solution Items/">
+    <File Path=".dockerignore" />
+    <File Path=".editorconfig" />
+    <File Path=".example.env" />
+    <File Path=".gitattributes" />
+    <File Path=".gitignore" />
+    <File Path="Directory.Build.props" />
+    <File Path="Directory.Packages.props" />
+    <File Path="docker-compose.yml" />
+    <File Path="LICENSE" />
+    <File Path="README.md" />
+  </Folder>
+  <Project Path="src/PongRank.ConsoleApp/PongRank.ConsoleApp.csproj" />
+  <Project Path="src/PongRank.DataAccess/PongRank.DataAccess.csproj" />
+  <Project Path="src/PongRank.DataEntities/PongRank.DataEntities.csproj" />
+  <Project Path="src/PongRank.Frenoy/PongRank.FrenoyApi.csproj" />
+  <Project Path="src/PongRank.ML/PongRank.ML.csproj" />
+  <Project Path="src/PongRank.Model/PongRank.Model.csproj" />
+  <Project Path="src/PongRank.WebApi/PongRank.WebApi.csproj" />
+</Solution>
