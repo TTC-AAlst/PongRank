@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>net9.0</TargetFramework>
+    <TargetFramework>net10.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
     <NoWarn>CS1591</NoWarn>
@@ -16,8 +16,8 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="CoreWCF.Http" Version="1.6.0" />
-    <PackageReference Include="CoreWCF.Primitives" Version="1.6.0" />
+    <PackageReference Include="CoreWCF.Http" Version="1.8.0" />
+    <PackageReference Include="CoreWCF.Primitives" Version="1.8.0" />
     <PackageReference Include="Microsoft.EntityFrameworkCore" Version="9.0.4" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Relational" Version="9.0.4" />
     <PackageReference Include="System.ServiceModel.Duplex" Version="6.0.*" />

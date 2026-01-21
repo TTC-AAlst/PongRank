@@ -1,4 +1,5 @@
 using Itenium.Forge.Controllers;
+using Itenium.Forge.HealthChecks;
 using Itenium.Forge.Logging;
 using Itenium.Forge.Settings;
 using Itenium.Forge.Swagger;
@@ -21,6 +22,7 @@ try
 
     builder.AddForgeLogging();
     builder.AddForgeControllers();
+    builder.AddForgeHealthChecks();
 
     builder.AddForgeSwagger(typeof(TrainingService), typeof(FrenoySettings));
 
@@ -36,6 +38,7 @@ try
 
     var app = builder.Build();
     app.UseForgeLogging();
+    app.UseForgeHealthChecks();
 
     app.UseForgeSwagger();
 
