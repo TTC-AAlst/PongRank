@@ -1,4 +1,4 @@
-﻿using FrenoyVttl;
+using FrenoyVttl;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using PongRank.DataEntities;
@@ -133,6 +133,15 @@ public class FrenoyApiClient
                 WithResults = true,
                 WithResultsSpecified = true,
             }));
+
+            if (tournamentDetails.GetTournamentsResponse.TournamentEntries.Length == 0
+                || tournamentDetails.GetTournamentsResponse.TournamentEntries[0].SerieEntries is null)
+            {
+                // Tournament that never happened etc...
+                tournamentEntity.SyncCompleted = true;
+                await _db.SaveChangesAsync();
+                continue;
+            }
 
             Debug.Assert(tournamentDetails.GetTournamentsResponse.TournamentEntries.Length == 1);
             var matches = tournamentDetails.GetTournamentsResponse.TournamentEntries[0].SerieEntries
