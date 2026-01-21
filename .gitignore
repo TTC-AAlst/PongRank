@@ -216,3 +216,4 @@ src/PongRank.WebApi/logs/
 src/PongRank.ConsoleApp/logs/
 .env
 appsettings.Release.json
+.claude/settings.local.json
