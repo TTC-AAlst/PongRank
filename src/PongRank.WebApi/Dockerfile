@@ -1,4 +1,4 @@
-FROM mcr.microsoft.com/dotnet/sdk:9.0 AS build
+FROM mcr.microsoft.com/dotnet/sdk:10.0 AS build
 
 # First error:
 # System.DllNotFoundException: Unable to load shared library 'lib_lightgbm' or one of its dependencies. In order to help diagnose loading problems, consider using a tool like strace. If you're using glibc, consider setting the LD_DEBUG environment variable:
@@ -26,6 +26,8 @@ ARG Nuget_CustomFeedPassword
 
 COPY *.slnx .
 COPY nuget.config .
+COPY Directory.Build.props .
+COPY Directory.Packages.props .
 COPY src/PongRank.Frenoy/*.csproj ./src/PongRank.Frenoy/
 COPY src/PongRank.DataAccess/*.csproj ./src/PongRank.DataAccess/
 COPY src/PongRank.DataEntities/*.csproj ./src/PongRank.DataEntities/
@@ -49,7 +51,7 @@ RUN dotnet publish -c Release -o /app
 
 
 
-FROM mcr.microsoft.com/dotnet/aspnet:9.0 as runtime
+FROM mcr.microsoft.com/dotnet/aspnet:10.0 AS runtime
 
 
 WORKDIR /app
