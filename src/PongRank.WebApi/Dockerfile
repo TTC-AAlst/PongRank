@@ -34,7 +34,7 @@ COPY src/PongRank.ML/*.csproj ./src/PongRank.ML/
 COPY src/PongRank.WebApi/*.csproj ./src/PongRank.WebApi/
 COPY src/PongRank.ConsoleApp/*.csproj ./src/PongRank.ConsoleApp/
 
-RUN dotnet restore
+RUN dotnet restore src/PongRank.WebApi/PongRank.WebApi.csproj
 
 COPY src/PongRank.Frenoy/. ./src/PongRank.Frenoy/
 COPY src/PongRank.DataAccess/. ./src/PongRank.DataAccess/
