@@ -84,7 +84,7 @@ public class HistoricalSyncRunner
                 }
                 catch (Exception ex) when (ex.Message.Contains("Quota exceeded"))
                 {
-                    Apply(state, new SyncOutcome(SyncStatus.Pending, "QuotaExceeded"));
+                    Apply(state, SyncDecision.Evaluate(year, currentYear, nothingLeft: false, quotaExceeded: true));
                     await _db.SaveChangesAsync();
                     _logger.LogWarning("SyncRun {Competition} {Year} outcome=QuotaExceeded", competition, year);
                     return; // quota is global — stop the whole run
