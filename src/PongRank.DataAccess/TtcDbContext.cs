@@ -2,6 +2,9 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Design;
 using PongRank.DataEntities;
 using PongRank.DataEntities.Core;
+using System.Runtime.CompilerServices;
+
+[assembly: InternalsVisibleTo("PongRank.Tests")]
 
 namespace PongRank.DataAccess;
 

@@ -1,0 +1,23 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <IsPackable>false</IsPackable>
+    <GenerateDocumentationFile>false</GenerateDocumentationFile>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.NET.Test.Sdk" />
+    <PackageReference Include="xunit" />
+    <PackageReference Include="xunit.runner.visualstudio" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.InMemory" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="../PongRank.WebApi/PongRank.WebApi.csproj" />
+    <ProjectReference Include="../PongRank.DataAccess/PongRank.DataAccess.csproj" />
+    <ProjectReference Include="../PongRank.DataEntities/PongRank.DataEntities.csproj" />
+    <ProjectReference Include="../PongRank.Model/PongRank.Model.csproj" />
+    <ProjectReference Include="../PongRank.Frenoy/PongRank.FrenoyApi.csproj" />
+  </ItemGroup>
+
+</Project>

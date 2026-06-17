@@ -17,5 +17,6 @@
   <Project Path="src/PongRank.Frenoy/PongRank.FrenoyApi.csproj" />
   <Project Path="src/PongRank.ML/PongRank.ML.csproj" />
   <Project Path="src/PongRank.Model/PongRank.Model.csproj" />
+  <Project Path="src/PongRank.Tests/PongRank.Tests.csproj" />
   <Project Path="src/PongRank.WebApi/PongRank.WebApi.csproj" />
 </Solution>
