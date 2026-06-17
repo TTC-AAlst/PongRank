@@ -118,9 +118,10 @@ logger.LogInformation(
 
 - `matchesAdded` = match-count delta (count matches for `(comp,year)` before/after `Sync()`;
   no change to `Sync()`'s signature).
-- Quota: small addition to `FrenoyApiClient` — capture `CurrentQuota`/`AllowedQuota` off the
-  SOAP responses into a `LastQuota` property the runner logs. Powers the "quota remaining"
-  panel and directly serves the don't-blow-quota goal.
+- Quota: the SOAP proxy exposes `CurrentQuota`/`AllowedQuota` **only on `TestResponse`** (not
+  on match/club responses). So `FrenoyApiClient` gets a `GetQuotaAsync()` that issues a `Test`
+  call; the runner logs quota once per competition per cycle (best-effort, wrapped so a failed
+  `Test` never aborts a sync). Powers the "quota remaining" panel and the don't-blow-quota goal.
 - New dashboard `homelab/obs-01/grafana/provisioning/dashboards/06-ttc-pong-sync.json`
   (**Home** repo). Panels: sync runs over time by comp/year, outcome breakdown, quota
   remaining, errors, last-run table.
