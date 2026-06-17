@@ -10,6 +10,7 @@ public interface ITtcDbContext : IAsyncDisposable
     DbSet<MatchEntity> Matches { get; set; }
     DbSet<PlayerResultsEntity> PlayerResults { get; set; }
     DbSet<TournamentEntity> Tournaments { get; set; }
+    DbSet<SyncStateEntity> SyncStates { get; set; }
 
     Task<int> SaveChangesAsync(CancellationToken token = default);
 
