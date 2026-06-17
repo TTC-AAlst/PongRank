@@ -28,6 +28,13 @@ services:
       - pongrank-ml-models:/ml-models
     depends_on:
       - db
+    healthcheck:
+      # Liveness (not /health/ready) — Coolify shows container health / restarts on fail.
+      test: ["CMD", "curl", "-fsS", "http://localhost:5000/health/live"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 40s
 
 volumes:
   pongrank-db-data:

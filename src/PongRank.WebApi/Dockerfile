@@ -35,7 +35,7 @@ FROM mcr.microsoft.com/dotnet/aspnet:10.0 AS runtime
 
 # libgomp1: LightGBM (ML.NET) OpenMP runtime. libgssapi-krb5-2: Npgsql 10 loads
 # libgssapi_krb5.so.2 during connection auth; absent from the slim aspnet image.
-RUN apt-get update && apt-get install -y libgomp1 libgssapi-krb5-2 && rm -rf /var/lib/apt/lists/*
+RUN apt-get update && apt-get install -y libgomp1 libgssapi-krb5-2 curl && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /app
 COPY --from=build /app .
