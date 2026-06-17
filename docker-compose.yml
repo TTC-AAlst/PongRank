@@ -1,18 +1,13 @@
 services:
   db:
     image: postgres:16
-    container_name: pongrank-db
     restart: always
     environment:
       POSTGRES_USER: ponguser
-      POSTGRES_PASSWORD: ${DB_PASSWORD:-my-secret-pw}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
       POSTGRES_DB: PongRank
-    ports:
-      - "7301:5432"
-    networks:
-      - pongranknet
     volumes:
-      - db-data:/var/lib/postgresql/data
+      - pongrank-db-data:/var/lib/postgresql/data
 
   ml-webapi:
     build:
@@ -21,28 +16,19 @@ services:
       args:
         - Nuget_CustomFeedUserName=${Nuget_CustomFeedUserName}
         - Nuget_CustomFeedPassword=${Nuget_CustomFeedPassword}
-    container_name: pongrank-backend
     restart: always
-    ports:
-      - "7300:5000"
-    networks:
-      - pongranknet
-      - monitoring_monitoring
+    expose:
+      - "5000"
     environment:
       - ASPNETCORE_URLS=http://*:5000
       - DOTNET_ENVIRONMENT=Release
-      - DB_PASSWORD=${DB_PASSWORD:-my-secret-pw}
+      - DB_PASSWORD=${DB_PASSWORD}
+      - ForgeConfiguration__Logging__LokiUrl=http://obs-01.lan.sangu.be:3100
     volumes:
-      - /volume1/Projects/PongRank-Logs:/app/logs
-      - /volume1/Projects/PongRank-Models:/ml-models
+      - pongrank-ml-models:/ml-models
     depends_on:
       - db
 
 volumes:
-  db-data:
-
-networks:
-  pongranknet:
-    driver: bridge
-  monitoring_monitoring:
-    external: true
+  pongrank-db-data:
+  pongrank-ml-models:
