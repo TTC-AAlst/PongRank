@@ -42,9 +42,10 @@
     <PackageVersion Include="System.ServiceModel.Http" Version="6.0.0" />
     <PackageVersion Include="System.ServiceModel.NetTcp" Version="6.0.0" />
     <PackageVersion Include="System.ServiceModel.Security" Version="6.0.0" />
-    <!-- Pin transitive (pulled by System.ServiceModel.*) above GHSA-37gx-xxp4-5rgx,
-         which flags 8.0.2 high-severity; NU1903 + TreatWarningsAsErrors fails restore. -->
-    <PackageVersion Include="System.Security.Cryptography.Xml" Version="10.0.0" />
+    <!-- Pin transitive (pulled by System.ServiceModel.*) to the patched version for
+         CVE-2026-33116 / GHSA-37gx-xxp4-5rgx (EncryptedXml DoS, affects 10.0.0–10.0.5).
+         Without this, NU1903 + TreatWarningsAsErrors fails restore. -->
+    <PackageVersion Include="System.Security.Cryptography.Xml" Version="10.0.6" />
 
     <!-- Itenium.Forge -->
     <PackageVersion Include="Itenium.Forge.Controllers" Version="0.3.13" />
