@@ -23,7 +23,7 @@ services:
       - ASPNETCORE_URLS=http://*:5000
       - DOTNET_ENVIRONMENT=Release
       - DB_PASSWORD=${DB_PASSWORD}
-      - ForgeConfiguration__Logging__LokiUrl=http://obs-01.lan.sangu.be:3100
+      - ForgeConfiguration__Logging__LokiUrl=https://loki.lan.sangu.be
     volumes:
       - pongrank-ml-models:/ml-models
     depends_on:
