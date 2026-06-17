@@ -11,7 +11,7 @@ namespace PongRank.FrenoyApi;
 /// <summary>
 /// Step 1: Sync Clubs, Players, Matches and Tournaments
 /// </summary>
-public class FrenoyApiClient
+public class FrenoyApiClient : IFrenoyApiClient
 {
     #region Fields
     private const string FrenoyVttlEndpoint = "https://api.vttl.be/index.php?s=vttl";
@@ -22,6 +22,7 @@ public class FrenoyApiClient
     private TabTAPI_PortTypeClient _frenoy;
     private readonly ITtcDbContext _db;
     private readonly ILogger<FrenoyApiClient> _logger;
+    private (int Current, int Allowed)? _lastQuota;
     #endregion
 
     #region Constructor
@@ -62,6 +63,28 @@ public class FrenoyApiClient
         }
     }
     #endregion
+
+    public (int Current, int Allowed)? LastQuota => _lastQuota;
+
+    public async Task<(int Current, int Allowed)?> GetQuotaAsync()
+    {
+        try
+        {
+            var response = await _frenoy.TestAsync(new TestRequest1(new TestRequest()));
+            var test = response.TestResponse;
+            if (int.TryParse(test.CurrentQuota, out int current) && int.TryParse(test.AllowedQuota, out int allowed))
+            {
+                _lastQuota = (current, allowed);
+                return _lastQuota;
+            }
+        }
+        catch (Exception ex)
+        {
+            _logger.LogWarning("GetQuota failed: {ErrorMessage}", ex.Message);
+        }
+
+        return null;
+    }
 
     public async Task Sync()
     {
