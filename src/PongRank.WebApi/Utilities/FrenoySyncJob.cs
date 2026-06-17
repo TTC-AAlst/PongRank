@@ -1,5 +1,3 @@
-using PongRank.FrenoyApi;
-
 namespace PongRank.WebApi.Utilities;
 
 /// <summary>
@@ -25,37 +23,19 @@ public class FrenoySyncJob : IHostedService, IDisposable
     {
         using var scope = _services.CreateScope();
         var logger = scope.ServiceProvider.GetRequiredService<ILogger<FrenoySyncJob>>();
-        var jobSettings = scope.ServiceProvider.GetRequiredService<SyncJobSettings>();
         try
         {
             logger.LogInformation("SyncJob Started at {SyncStart}", DateTime.Now.ToString("dd/MM/yyyy HH:mm:ss"));
-            logger.LogInformation("SyncJob with {@Settings}", jobSettings);
-
-            var frenoy = scope.ServiceProvider.GetRequiredService<FrenoyApiClient>();
-            foreach (var competition in jobSettings.SyncCompetitions)
-            {
-                foreach (int year in jobSettings.SyncYears)
-                {
-                    logger.LogInformation("FrenoySync for {competition} {year}", competition, year);
-                    var settings = new FrenoySettings(competition, year, jobSettings.SyncCategoryNames);
-                    frenoy.Open(settings);
-                    await frenoy.Sync();
-                }
-            }
-
-            logger.LogInformation("SyncJob Ended at {SyncStart}", DateTime.Now.ToString("dd/MM/yyyy HH:mm:ss"));
-            _timer?.Change(TimeSpan.FromHours(12), Timeout.InfiniteTimeSpan);
+            var runner = scope.ServiceProvider.GetRequiredService<HistoricalSyncRunner>();
+            await runner.RunAsync();
+            logger.LogInformation("SyncJob Ended at {SyncEnd}", DateTime.Now.ToString("dd/MM/yyyy HH:mm:ss"));
         }
         catch (Exception ex)
         {
-            if (ex.Message.Contains("Quota exceeded"))
-            {
-                logger.LogWarning("FrenoySyncJob failed {ErrorMessage}", ex.Message);
-            }
-            else
-            {
-                logger.LogError(ex, "FrenoySyncJob failed {ErrorMessage}", ex.Message);
-            }
+            logger.LogError(ex, "FrenoySyncJob failed {ErrorMessage}", ex.Message);
+        }
+        finally
+        {
             _timer?.Change(TimeSpan.FromHours(12), Timeout.InfiniteTimeSpan);
         }
     }
