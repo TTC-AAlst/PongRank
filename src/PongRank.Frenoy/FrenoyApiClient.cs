@@ -82,7 +82,15 @@ public class FrenoyApiClient
         var club = await _db.Clubs
             .Where(x => x.Competition == _settings.Competition)
             .Where(x => x.Year == _settings.Year)
-            .SingleAsync(x => x.UniqueIndex == clubUniqueIndex);
+            .SingleOrDefaultAsync(x => x.UniqueIndex == clubUniqueIndex);
+
+        // Current-season sync runs before the season is necessarily synced into the DB
+        // (e.g. CurrentYear has no club rows yet) — warn and skip instead of throwing.
+        if (club is null)
+        {
+            _logger.LogWarning("SyncMatches skipped: no club {ClubIndex} for {Competition} {Year} — season not synced yet", clubUniqueIndex, _settings.Competition, _settings.Year);
+            return;
+        }
 
         await SyncMatches([club], true);
     }
