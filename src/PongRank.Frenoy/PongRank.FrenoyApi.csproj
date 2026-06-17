@@ -13,6 +13,8 @@
     <PackageReference Include="System.ServiceModel.Http" />
     <PackageReference Include="System.ServiceModel.NetTcp" />
     <PackageReference Include="System.ServiceModel.Security" />
+    <!-- Promote the transitive crypto dep to a direct ref so the patched version pins (GHSA-37gx-xxp4-5rgx). -->
+    <PackageReference Include="System.Security.Cryptography.Xml" />
   </ItemGroup>
 
   <ItemGroup>
