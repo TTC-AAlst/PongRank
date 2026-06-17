@@ -28,6 +28,9 @@ try
     GlobalBackendConfiguration.Configure(builder.Services, builder.Configuration);
     builder.Services.AddScoped<PredictionService>();
     builder.Services.AddScoped<FrenoyApiClient>();
+    builder.Services.AddSingleton(TimeProvider.System);
+    builder.Services.AddScoped<IFrenoyApiClient>(sp => sp.GetRequiredService<FrenoyApiClient>());
+    builder.Services.AddScoped<HistoricalSyncRunner>();
     builder.Services.AddScoped<TrainingService>();
     if (settings.StartSyncJob)
     {

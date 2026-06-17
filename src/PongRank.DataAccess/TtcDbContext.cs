@@ -2,6 +2,9 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Design;
 using PongRank.DataEntities;
 using PongRank.DataEntities.Core;
+using System.Runtime.CompilerServices;
+
+[assembly: InternalsVisibleTo("PongRank.Tests")]
 
 namespace PongRank.DataAccess;
 
@@ -12,6 +15,7 @@ internal class TtcDbContext : DbContext, ITtcDbContext
     public DbSet<MatchEntity> Matches { get; set; }
     public DbSet<PlayerResultsEntity> PlayerResults { get; set; }
     public DbSet<TournamentEntity> Tournaments { get; set; }
+    public DbSet<SyncStateEntity> SyncStates { get; set; }
 
     public TtcDbContext(DbContextOptions<TtcDbContext> options) : base(options)
     {
@@ -33,6 +37,11 @@ internal class TtcDbContext : DbContext, ITtcDbContext
             entity.OwnsOne(e => e.Home);
             entity.OwnsOne(e => e.Away);
         });
+
+        modelBuilder.Entity<SyncStateEntity>()
+            .Property(e => e.Status)
+            .HasConversion<string>()
+            .HasMaxLength(20);
     }
 }
 
