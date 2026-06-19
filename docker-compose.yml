@@ -8,6 +8,10 @@ services:
       POSTGRES_DB: PongRank
     volumes:
       - pongrank-db-data:/var/lib/postgresql/data
+    ports:
+      # LAN access for ad-hoc queries (DBeaver/psql → apps-01.lan.sangu.be:7301).
+      # 7301 = PongRank's old nas-work port; avoids the default-5432 clash other Coolify apps may want.
+      - "7301:5432"
     healthcheck:
       # No healthcheck => Docker reports no State.Health => Coolify shows "unknown".
       test: ["CMD-SHELL", "pg_isready -U ponguser -d PongRank"]
