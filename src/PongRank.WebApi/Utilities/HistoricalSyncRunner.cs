@@ -50,8 +50,6 @@ public class HistoricalSyncRunner
 
         foreach (var competition in _settings.SyncCompetitions)
         {
-            await LogQuotaAsync(competition, currentYear);
-
             foreach (int year in _settings.SyncYears)
             {
                 var state = await GetOrCreateState(competition, year);
@@ -105,15 +103,6 @@ public class HistoricalSyncRunner
         state.LastOutcome = outcome.LastOutcome;
         state.AttemptCount++;
         state.LastAttemptUtc = _clock.GetUtcNow().UtcDateTime;
-    }
-
-    private async Task LogQuotaAsync(Competition competition, int currentYear)
-    {
-        // Open a client so GetQuota targets the right competition endpoint.
-        _frenoy.Open(new FrenoySettings(competition, currentYear, _settings.SyncCategoryNames));
-        var quota = await _frenoy.GetQuotaAsync();
-        if (quota is { } q)
-            _logger.LogInformation("SyncQuota {Competition} current={QuotaCurrent} allowed={QuotaAllowed}", competition, q.Current, q.Allowed);
     }
 
     private async Task<SyncStateEntity> GetOrCreateState(Competition competition, int year)

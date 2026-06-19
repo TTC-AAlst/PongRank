@@ -21,7 +21,4 @@ internal class FakeFrenoyApiClient : IFrenoyApiClient
     }
 
     public Task SyncMatches(string clubUniqueIndex) => Task.CompletedTask;
-
-    public (int Current, int Allowed)? LastQuota => (100, 200);
-    public Task<(int Current, int Allowed)?> GetQuotaAsync() => Task.FromResult<(int, int)?>((100, 200));
 }

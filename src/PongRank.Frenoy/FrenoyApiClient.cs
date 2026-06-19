@@ -22,7 +22,6 @@ public class FrenoyApiClient : IFrenoyApiClient
     private TabTAPI_PortTypeClient _frenoy;
     private readonly ITtcDbContext _db;
     private readonly ILogger<FrenoyApiClient> _logger;
-    private (int Current, int Allowed)? _lastQuota;
     #endregion
 
     #region Constructor
@@ -63,28 +62,6 @@ public class FrenoyApiClient : IFrenoyApiClient
         }
     }
     #endregion
-
-    public (int Current, int Allowed)? LastQuota => _lastQuota;
-
-    public async Task<(int Current, int Allowed)?> GetQuotaAsync()
-    {
-        try
-        {
-            var response = await _frenoy.TestAsync(new TestRequest1(new TestRequest()));
-            var test = response.TestResponse;
-            if (int.TryParse(test.CurrentQuota, out int current) && int.TryParse(test.AllowedQuota, out int allowed))
-            {
-                _lastQuota = (current, allowed);
-                return _lastQuota;
-            }
-        }
-        catch (Exception ex)
-        {
-            _logger.LogWarning("GetQuota failed: {ErrorMessage}", ex.Message);
-        }
-
-        return null;
-    }
 
     public async Task Sync()
     {
