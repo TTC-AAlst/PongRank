@@ -81,6 +81,21 @@ public class HistoricalSyncRunnerTests
     }
 
     [Fact]
+    public async Task QuotaExceeded_logs_the_server_message()
+    {
+        using var db = InMemoryDb.Create();
+        var frenoy = new FakeFrenoyApiClient { ThrowOnSync = new Exception("Quota exceeded for today") };
+        var logger = new CapturingLogger<HistoricalSyncRunner>();
+
+        await new HistoricalSyncRunner(db, frenoy, Settings(2023), Clock, logger).RunAsync();
+
+        // The TabT server's own quota message must survive to the log — the dashboard
+        // gauge (current=0) is unreliable, so this is the only authoritative signal.
+        Assert.Contains(logger.Messages,
+            m => m.Contains("outcome=QuotaExceeded") && m.Contains("Quota exceeded for today"));
+    }
+
+    [Fact]
     public async Task NonQuota_error_records_Error_and_continues_to_next_year()
     {
         using var db = InMemoryDb.Create();
