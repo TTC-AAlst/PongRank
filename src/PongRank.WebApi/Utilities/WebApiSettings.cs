@@ -13,6 +13,7 @@ public class WebApiSettings : IForgeSettings
     public SyncJobSettings SyncJob { get; set; } = new();
     public MLSettings ML { get; set; } = new();
     public CurrentYearSettings CurrentYear { get; set; } = new();
+    public NtfySettings Ntfy { get; set; } = new();
 }
 
 /// <summary>

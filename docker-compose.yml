@@ -34,6 +34,7 @@ services:
       - ASPNETCORE_URLS=http://*:5000
       - DOTNET_ENVIRONMENT=Release
       - DB_PASSWORD=${DB_PASSWORD}
+      - NTFY_TOKEN=${NTFY_TOKEN}
     volumes:
       - pongrank-ml-models:/ml-models
     depends_on:

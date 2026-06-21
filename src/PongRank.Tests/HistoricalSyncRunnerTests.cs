@@ -20,8 +20,8 @@ public class HistoricalSyncRunnerTests
         SyncCategoryNames = new[] { "Oost-Vlaanderen" },
     };
 
-    private static HistoricalSyncRunner Runner(TtcDbContext db, FakeFrenoyApiClient frenoy, SyncJobSettings settings) =>
-        new(db, frenoy, settings, Clock, NullLogger<HistoricalSyncRunner>.Instance);
+    private static HistoricalSyncRunner Runner(TtcDbContext db, FakeFrenoyApiClient frenoy, SyncJobSettings settings, INtfyNotifier? notifier = null) =>
+        new(db, frenoy, settings, Clock, NullLogger<HistoricalSyncRunner>.Instance, notifier ?? new FakeNtfyNotifier());
 
     [Fact]
     public async Task Closed_year_is_skipped_no_api_call()
@@ -87,7 +87,7 @@ public class HistoricalSyncRunnerTests
         var frenoy = new FakeFrenoyApiClient { ThrowOnSync = new Exception("Quota exceeded for today") };
         var logger = new CapturingLogger<HistoricalSyncRunner>();
 
-        await new HistoricalSyncRunner(db, frenoy, Settings(2023), Clock, logger).RunAsync();
+        await new HistoricalSyncRunner(db, frenoy, Settings(2023), Clock, logger, new FakeNtfyNotifier()).RunAsync();
 
         // The TabT server's own quota message must survive to the log — the dashboard
         // gauge (current=0) is unreliable, so this is the only authoritative signal.
@@ -162,5 +162,51 @@ public class HistoricalSyncRunnerTests
         // Quota on Vttl aborts the whole run — Sporta is never attempted.
         Assert.Single(frenoy.SyncedYears);
         Assert.Equal("Vttl", frenoy.SyncedYears[0].Competition);
+    }
+
+    [Fact]
+    public async Task New_matches_trigger_one_slack_notification()
+    {
+        using var db = InMemoryDb.Create();
+        var frenoy = new FakeFrenoyApiClient
+        {
+            OnSync = async _ =>
+            {
+                db.Matches.Add(new MatchEntity { Competition = Competition.Vttl, Year = 2024 });
+                await db.SaveChangesAsync();
+            },
+        };
+        var ntfy = new FakeNtfyNotifier();
+
+        await Runner(db, frenoy, Settings(2024), ntfy).RunAsync();
+
+        var sent = Assert.Single(ntfy.Sent);
+        Assert.Equal(Competition.Vttl, sent.Competition);
+        Assert.Equal(2024, sent.Year);
+        Assert.Equal(1, sent.NewMatches);
+    }
+
+    [Fact]
+    public async Task No_new_matches_sends_no_notification()
+    {
+        using var db = InMemoryDb.Create();
+        var frenoy = new FakeFrenoyApiClient();
+        var ntfy = new FakeNtfyNotifier();
+
+        await Runner(db, frenoy, Settings(2024), ntfy).RunAsync();
+
+        Assert.Empty(ntfy.Sent);
+    }
+
+    [Fact]
+    public async Task QuotaExceeded_sends_no_notification()
+    {
+        using var db = InMemoryDb.Create();
+        var frenoy = new FakeFrenoyApiClient { ThrowOnSync = new Exception("Quota exceeded for today") };
+        var ntfy = new FakeNtfyNotifier();
+
+        await Runner(db, frenoy, Settings(2024), ntfy).RunAsync();
+
+        Assert.Empty(ntfy.Sent);
     }
 }

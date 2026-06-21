@@ -19,6 +19,11 @@ try
     builder.Services.AddSingleton(settings.SyncJob);
     builder.Services.AddSingleton(settings.CurrentYear);
 
+    // Token is the secret (Coolify → SOPS); Url/Topic live in appsettings. Empty token = off.
+    settings.Ntfy.Token = Environment.GetEnvironmentVariable("NTFY_TOKEN") ?? "";
+    builder.Services.AddSingleton(settings.Ntfy);
+    builder.Services.AddHttpClient<INtfyNotifier, NtfyNotifier>();
+
     builder.AddForgeLogging();
     builder.AddForgeControllers();
     builder.AddForgeHealthChecks();

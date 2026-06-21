@@ -19,19 +19,22 @@ public class HistoricalSyncRunner
     private readonly SyncJobSettings _settings;
     private readonly TimeProvider _clock;
     private readonly ILogger<HistoricalSyncRunner> _logger;
+    private readonly INtfyNotifier _notifier;
 
     public HistoricalSyncRunner(
         ITtcDbContext db,
         IFrenoyApiClient frenoy,
         SyncJobSettings settings,
         TimeProvider clock,
-        ILogger<HistoricalSyncRunner> logger)
+        ILogger<HistoricalSyncRunner> logger,
+        INtfyNotifier notifier)
     {
         _db = db;
         _frenoy = frenoy;
         _settings = settings;
         _clock = clock;
         _logger = logger;
+        _notifier = notifier;
     }
 
     // Season spans Aug–Jul: before September, "current" is the previous calendar year.
@@ -66,6 +69,7 @@ public class HistoricalSyncRunner
                     int matchesBefore = await CountMatches(competition, year);
                     await _frenoy.Sync();
                     int matchesAfter = await CountMatches(competition, year);
+                    int matchesAdded = matchesAfter - matchesBefore;
 
                     var (clubsSynced, clubsTotal) = await CountClubs(competition, year);
                     var (tournamentsSynced, tournamentsTotal) = await CountTournaments(competition, year);
@@ -78,7 +82,12 @@ public class HistoricalSyncRunner
                     _logger.LogInformation(
                         "SyncRun {Competition} {Year} outcome={Outcome} clubsSynced={ClubsSynced}/{ClubsTotal} matchesAdded={MatchesAdded} tournamentsSynced={TournamentsSynced}/{TournamentsTotal}",
                         competition, year, outcome.LastOutcome, clubsSynced, clubsTotal,
-                        matchesAfter - matchesBefore, tournamentsSynced, tournamentsTotal);
+                        matchesAdded, tournamentsSynced, tournamentsTotal);
+
+                    // New results → Slack #apps (via the ntfy bridge). Silent when nothing changed.
+                    if (matchesAdded > 0)
+                        await _notifier.SyncCompletedAsync(competition, year, matchesAdded,
+                            clubsSynced, clubsTotal, tournamentsSynced, tournamentsTotal);
                 }
                 catch (Exception ex) when (ex.Message.Contains("Quota exceeded"))
                 {
