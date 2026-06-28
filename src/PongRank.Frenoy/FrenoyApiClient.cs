@@ -157,7 +157,7 @@ public class FrenoyApiClient : IFrenoyApiClient
                 .SelectMany(x => x.ResultEntries)
                 .ToArray();
 
-            _logger.LogInformation("Syncing tournament {TournamentName} (#{MatchesCount} matches)", tournamentEntity.Name, matches.Length);
+            _logger.LogInformation("Syncing tournament {TournamentName} (#{MatchesCount} matches in {Year})", tournamentEntity.Name, matches.Length, _settings.Year);
             foreach (var match in matches)
             {
                 if (match.IsHomeForfeited || match.IsAwayForfeited)
