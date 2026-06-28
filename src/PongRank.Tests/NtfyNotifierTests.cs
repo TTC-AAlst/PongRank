@@ -29,21 +29,27 @@ public class NtfyNotifierTests
             new NtfySettings { Url = "https://ntfy.test", Topic = "apps", Token = token },
             NullLogger<NtfyNotifier>.Instance);
 
+    private static SyncSummary Summary(string outcome = "Completed") =>
+        new(Competition.Vttl, 2023, MatchesAdded: 800, TournamentsAdded: 15,
+            ClubsSynced: 12, ClubsTotal: 40, TournamentsSynced: 15, TournamentsTotal: 93, Outcome: outcome);
+
     [Fact]
     public async Task Posts_title_priority_bearer_and_body()
     {
         var handler = new CapturingHandler();
 
-        await Notifier(handler, "tk_test").SyncCompletedAsync(Competition.Vttl, 2024, 38, 12, 12, 6, 6);
+        await Notifier(handler, "tk_test").NotifyAsync(Summary("QuotaExceeded"));
 
         Assert.Equal(1, handler.Calls);
         Assert.Equal(HttpMethod.Post, handler.Request!.Method);
         Assert.Equal("https://ntfy.test/apps", handler.Request.RequestUri!.ToString());
-        Assert.Equal("PongRank sync: Vttl 2024", handler.Request.Headers.GetValues("Title").Single());
+        Assert.Equal("PongRank sync: Vttl 2023", handler.Request.Headers.GetValues("Title").Single());
         Assert.Equal("2", handler.Request.Headers.GetValues("Priority").Single());
         Assert.Equal("Bearer", handler.Request.Headers.Authorization!.Scheme);
         Assert.Equal("tk_test", handler.Request.Headers.Authorization.Parameter);
-        Assert.Equal("🏓 38 new matches\n12/12 clubs · 6/6 tournaments synced", handler.Body);
+        Assert.Equal(
+            "🏓 synced 15 tournaments from 2023 (800 matches)\n12/40 clubs · 15/93 tournaments · QuotaExceeded",
+            handler.Body);
     }
 
     [Fact]
@@ -51,7 +57,7 @@ public class NtfyNotifierTests
     {
         var handler = new CapturingHandler();
 
-        await Notifier(handler, "").SyncCompletedAsync(Competition.Vttl, 2024, 38, 12, 12, 6, 6);
+        await Notifier(handler, "").NotifyAsync(Summary());
 
         Assert.Equal(0, handler.Calls);
     }

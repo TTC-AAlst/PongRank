@@ -52,58 +52,72 @@ public class HistoricalSyncRunner
         int currentYear = CurrentYear;
 
         foreach (var competition in _settings.SyncCompetitions)
-        {
             foreach (int year in _settings.SyncYears)
-            {
-                var state = await GetOrCreateState(competition, year);
-                if (state.Status == SyncStatus.Closed)
-                {
-                    _logger.LogInformation("SyncRun {Competition} {Year} skipped (Closed)", competition, year);
-                    continue;
-                }
+                // Quota is global — a quota-exhausted year stops the whole run.
+                if (await SyncYear(competition, year, currentYear))
+                    return;
+    }
 
-                try
-                {
-                    _frenoy.Open(new FrenoySettings(competition, year, _settings.SyncCategoryNames));
-
-                    int matchesBefore = await CountMatches(competition, year);
-                    await _frenoy.Sync();
-                    int matchesAfter = await CountMatches(competition, year);
-                    int matchesAdded = matchesAfter - matchesBefore;
-
-                    var (clubsSynced, clubsTotal) = await CountClubs(competition, year);
-                    var (tournamentsSynced, tournamentsTotal) = await CountTournaments(competition, year);
-                    bool nothingLeft = clubsSynced == clubsTotal && tournamentsSynced == tournamentsTotal;
-
-                    var outcome = SyncDecision.Evaluate(year, currentYear, nothingLeft, quotaExceeded: false);
-                    Apply(state, outcome);
-                    await _db.SaveChangesAsync();
-
-                    _logger.LogInformation(
-                        "SyncRun {Competition} {Year} outcome={Outcome} clubsSynced={ClubsSynced}/{ClubsTotal} matchesAdded={MatchesAdded} tournamentsSynced={TournamentsSynced}/{TournamentsTotal}",
-                        competition, year, outcome.LastOutcome, clubsSynced, clubsTotal,
-                        matchesAdded, tournamentsSynced, tournamentsTotal);
-
-                    // New results → Slack #apps (via the ntfy bridge). Silent when nothing changed.
-                    if (matchesAdded > 0)
-                        await _notifier.SyncCompletedAsync(competition, year, matchesAdded,
-                            clubsSynced, clubsTotal, tournamentsSynced, tournamentsTotal);
-                }
-                catch (Exception ex) when (ex.Message.Contains("Quota exceeded"))
-                {
-                    Apply(state, SyncDecision.Evaluate(year, currentYear, nothingLeft: false, quotaExceeded: true));
-                    await _db.SaveChangesAsync();
-                    _logger.LogWarning("SyncRun {Competition} {Year} outcome=QuotaExceeded {ErrorMessage}", competition, year, ex.Message);
-                    return; // quota is global — stop the whole run
-                }
-                catch (Exception ex)
-                {
-                    Apply(state, new SyncOutcome(state.Status, "Error"));
-                    await _db.SaveChangesAsync();
-                    _logger.LogError(ex, "SyncRun {Competition} {Year} outcome=Error {ErrorMessage}", competition, year, ex.Message);
-                }
-            }
+    // Syncs one (Competition, Year), records state, and posts a Slack summary for every
+    // attempted year (success/quota/error alike). Returns true when quota was exhausted.
+    private async Task<bool> SyncYear(Competition competition, int year, int currentYear)
+    {
+        var state = await GetOrCreateState(competition, year);
+        if (state.Status == SyncStatus.Closed)
+        {
+            _logger.LogInformation("SyncRun {Competition} {Year} skipped (Closed)", competition, year);
+            return false; // skipped years aren't notified — nothing was synced
         }
+
+        int matchesBefore = await CountMatches(competition, year);
+        int tournamentsBefore = (await CountTournaments(competition, year)).Synced;
+
+        bool quotaExceeded = false;
+        Exception? error = null;
+        try
+        {
+            _frenoy.Open(new FrenoySettings(competition, year, _settings.SyncCategoryNames));
+            await _frenoy.Sync();
+        }
+        catch (Exception ex) when (ex.Message.Contains("Quota exceeded"))
+        {
+            quotaExceeded = true;
+            error = ex;
+        }
+        catch (Exception ex)
+        {
+            error = ex;
+        }
+
+        // Counted after the catch so quota/error runs still report their partial progress.
+        int matchesAdded = await CountMatches(competition, year) - matchesBefore;
+        var (clubsSynced, clubsTotal) = await CountClubs(competition, year);
+        var (tournamentsSynced, tournamentsTotal) = await CountTournaments(competition, year);
+        bool nothingLeft = clubsSynced == clubsTotal && tournamentsSynced == tournamentsTotal;
+
+        var outcome = (error, quotaExceeded) switch
+        {
+            (not null, false) => new SyncOutcome(state.Status, "Error"), // non-quota error preserves Status
+            _ => SyncDecision.Evaluate(year, currentYear, nothingLeft, quotaExceeded),
+        };
+        Apply(state, outcome);
+        await _db.SaveChangesAsync();
+
+        if (error is { } && !quotaExceeded)
+            _logger.LogError(error, "SyncRun {Competition} {Year} outcome=Error {ErrorMessage}", competition, year, error.Message);
+        else if (quotaExceeded)
+            _logger.LogWarning("SyncRun {Competition} {Year} outcome=QuotaExceeded {ErrorMessage}", competition, year, error!.Message);
+        else
+            _logger.LogInformation(
+                "SyncRun {Competition} {Year} outcome={Outcome} clubsSynced={ClubsSynced}/{ClubsTotal} matchesAdded={MatchesAdded} tournamentsSynced={TournamentsSynced}/{TournamentsTotal}",
+                competition, year, outcome.LastOutcome, clubsSynced, clubsTotal,
+                matchesAdded, tournamentsSynced, tournamentsTotal);
+
+        await _notifier.NotifyAsync(new SyncSummary(competition, year, matchesAdded,
+            tournamentsSynced - tournamentsBefore, clubsSynced, clubsTotal,
+            tournamentsSynced, tournamentsTotal, outcome.LastOutcome));
+
+        return quotaExceeded;
     }
 
     private void Apply(SyncStateEntity state, SyncOutcome outcome)

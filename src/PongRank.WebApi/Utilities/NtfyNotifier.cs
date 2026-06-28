@@ -23,17 +23,16 @@ public class NtfyNotifier : INtfyNotifier
         _logger = logger;
     }
 
-    public async Task SyncCompletedAsync(Competition competition, int year, int newMatches,
-        int clubsSynced, int clubsTotal, int tournamentsSynced, int tournamentsTotal)
+    public async Task NotifyAsync(SyncSummary s)
     {
         if (string.IsNullOrWhiteSpace(_settings.Token))
             return; // no token → notifications disabled (local/dev)
 
         // Title is the ntfy header → keep it ASCII; the emoji + middot live in the UTF-8 body.
-        var title = $"PongRank sync: {competition} {year}";
+        var title = $"PongRank sync: {s.Competition} {s.Year}";
         var body =
-            $"🏓 {newMatches} new matches\n" +
-            $"{clubsSynced}/{clubsTotal} clubs · {tournamentsSynced}/{tournamentsTotal} tournaments synced";
+            $"🏓 synced {s.TournamentsAdded} tournaments from {s.Year} ({s.MatchesAdded} matches)\n" +
+            $"{s.ClubsSynced}/{s.ClubsTotal} clubs · {s.TournamentsSynced}/{s.TournamentsTotal} tournaments · {s.Outcome}";
 
         using var request = new HttpRequestMessage(HttpMethod.Post, $"{_settings.Url}/{_settings.Topic}")
         {
@@ -50,7 +49,7 @@ public class NtfyNotifier : INtfyNotifier
         }
         catch (Exception ex)
         {
-            _logger.LogWarning(ex, "ntfy sync notification failed for {Competition} {Year}", competition, year);
+            _logger.LogWarning(ex, "ntfy sync notification failed for {Competition} {Year}", s.Competition, s.Year);
         }
     }
 }
